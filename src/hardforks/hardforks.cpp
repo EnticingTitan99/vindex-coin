@@ -35,9 +35,15 @@
 // VINDEX HARD FORK SCHEDULE
 //
 // Vindex launches fresh from genesis — no Monero history is inherited.
-// All forks activate from block 1 (genesis). The chain begins already at
+// All forks activate from block 0 (genesis). The chain begins already at
 // protocol version 16 (full feature parity with Monero v0.18), then adds
 // Vindex-specific upgrades via future forks.
+//
+// IMPORTANT: Heights must be 0 (not 1) so that the genesis block itself
+// is validated under hf_version=1. The HardFork object uses the height
+// of the *current* block being added, so genesis (height=0) must fall
+// under version 1. All subsequent forks also start at 0 so the chain
+// immediately operates at v16 from block 1 onward.
 //
 // Post-Quantum Roadmap (defined here for transparency):
 //   v17: Hybrid Ed25519 + CRYSTALS-Dilithium wallet keys (planned)
@@ -47,66 +53,68 @@
 
 const hardfork_t mainnet_hard_forks[] = {
   // Vindex launches with all Monero v0.18 features active from genesis.
+  // Heights are 0 so the hardfork object reports v1 at genesis (height 0),
+  // then immediately steps up to v16 for all subsequent blocks.
   // Timestamp: 2026-05-22 00:00:00 UTC = 1748044800
-  { 1,  1, 0, 1748044800 },
-  { 2,  1, 0, 1748044801 },
-  { 3,  1, 0, 1748044802 },
-  { 4,  1, 0, 1748044803 },
-  { 5,  1, 0, 1748044804 },
-  { 6,  1, 0, 1748044805 },
-  { 7,  1, 0, 1748044806 },
-  { 8,  1, 0, 1748044807 },
-  { 9,  1, 0, 1748044808 },
-  { 10, 1, 0, 1748044809 },
-  { 11, 1, 0, 1748044810 },
-  { 12, 1, 0, 1748044811 },
-  { 13, 1, 0, 1748044812 },
-  { 14, 1, 0, 1748044813 },
-  { 15, 1, 0, 1748044814 },
-  { 16, 1, 0, 1748044815 },
+  { 1,  0, 0, 1748044800 },
+  { 2,  0, 0, 1748044801 },
+  { 3,  0, 0, 1748044802 },
+  { 4,  0, 0, 1748044803 },
+  { 5,  0, 0, 1748044804 },
+  { 6,  0, 0, 1748044805 },
+  { 7,  0, 0, 1748044806 },
+  { 8,  0, 0, 1748044807 },
+  { 9,  0, 0, 1748044808 },
+  { 10, 0, 0, 1748044809 },
+  { 11, 0, 0, 1748044810 },
+  { 12, 0, 0, 1748044811 },
+  { 13, 0, 0, 1748044812 },
+  { 14, 0, 0, 1748044813 },
+  { 15, 0, 0, 1748044814 },
+  { 16, 0, 0, 1748044815 },
   // v17: Ring size 16 + Hybrid PQ signatures (planned ~100k blocks)
   // { 17, 100000, 0, TBD },
 };
 const size_t num_mainnet_hard_forks = sizeof(mainnet_hard_forks) / sizeof(mainnet_hard_forks[0]);
-const uint64_t mainnet_hard_fork_version_1_till = 0; // no v1-only period; all forks active from block 1
+const uint64_t mainnet_hard_fork_version_1_till = 0; // no v1-only period; all forks active from block 0
 
 const hardfork_t testnet_hard_forks[] = {
-  { 1,  1, 0, 1748044800 },
-  { 2,  1, 0, 1748044801 },
-  { 3,  1, 0, 1748044802 },
-  { 4,  1, 0, 1748044803 },
-  { 5,  1, 0, 1748044804 },
-  { 6,  1, 0, 1748044805 },
-  { 7,  1, 0, 1748044806 },
-  { 8,  1, 0, 1748044807 },
-  { 9,  1, 0, 1748044808 },
-  { 10, 1, 0, 1748044809 },
-  { 11, 1, 0, 1748044810 },
-  { 12, 1, 0, 1748044811 },
-  { 13, 1, 0, 1748044812 },
-  { 14, 1, 0, 1748044813 },
-  { 15, 1, 0, 1748044814 },
-  { 16, 1, 0, 1748044815 },
+  { 1,  0, 0, 1748044800 },
+  { 2,  0, 0, 1748044801 },
+  { 3,  0, 0, 1748044802 },
+  { 4,  0, 0, 1748044803 },
+  { 5,  0, 0, 1748044804 },
+  { 6,  0, 0, 1748044805 },
+  { 7,  0, 0, 1748044806 },
+  { 8,  0, 0, 1748044807 },
+  { 9,  0, 0, 1748044808 },
+  { 10, 0, 0, 1748044809 },
+  { 11, 0, 0, 1748044810 },
+  { 12, 0, 0, 1748044811 },
+  { 13, 0, 0, 1748044812 },
+  { 14, 0, 0, 1748044813 },
+  { 15, 0, 0, 1748044814 },
+  { 16, 0, 0, 1748044815 },
 };
 const size_t num_testnet_hard_forks = sizeof(testnet_hard_forks) / sizeof(testnet_hard_forks[0]);
 const uint64_t testnet_hard_fork_version_1_till = 0;
 
 const hardfork_t stagenet_hard_forks[] = {
-  { 1,  1, 0, 1748044800 },
-  { 2,  1, 0, 1748044801 },
-  { 3,  1, 0, 1748044802 },
-  { 4,  1, 0, 1748044803 },
-  { 5,  1, 0, 1748044804 },
-  { 6,  1, 0, 1748044805 },
-  { 7,  1, 0, 1748044806 },
-  { 8,  1, 0, 1748044807 },
-  { 9,  1, 0, 1748044808 },
-  { 10, 1, 0, 1748044809 },
-  { 11, 1, 0, 1748044810 },
-  { 12, 1, 0, 1748044811 },
-  { 13, 1, 0, 1748044812 },
-  { 14, 1, 0, 1748044813 },
-  { 15, 1, 0, 1748044814 },
-  { 16, 1, 0, 1748044815 },
+  { 1,  0, 0, 1748044800 },
+  { 2,  0, 0, 1748044801 },
+  { 3,  0, 0, 1748044802 },
+  { 4,  0, 0, 1748044803 },
+  { 5,  0, 0, 1748044804 },
+  { 6,  0, 0, 1748044805 },
+  { 7,  0, 0, 1748044806 },
+  { 8,  0, 0, 1748044807 },
+  { 9,  0, 0, 1748044808 },
+  { 10, 0, 0, 1748044809 },
+  { 11, 0, 0, 1748044810 },
+  { 12, 0, 0, 1748044811 },
+  { 13, 0, 0, 1748044812 },
+  { 14, 0, 0, 1748044813 },
+  { 15, 0, 0, 1748044814 },
+  { 16, 0, 0, 1748044815 },
 };
 const size_t num_stagenet_hard_forks = sizeof(stagenet_hard_forks) / sizeof(stagenet_hard_forks[0]);
