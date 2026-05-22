@@ -90,6 +90,9 @@ jobs:
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -DBUILD_TESTS=OFF \
             -DUSE_DEVICE_TREZOR=OFF \
+            -DMANUAL_SUBMODULES=1 \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DSTACK_TRACE=OFF \
             ../../../..
 
       - name: Build vindexd and vindex-wallet-rpc
