@@ -1022,6 +1022,7 @@ find_package(Sodium REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(libzmq REQUIRED IMPORTED_TARGET libzmq)
 
+include(WalletCrypto) # wallet crypto backend macros — must come before add_subdirectory(src)
 include(external/supercop/functions.cmake) # place after setting flags and before src directory inclusion
 add_subdirectory(contrib)
 add_subdirectory(src)
