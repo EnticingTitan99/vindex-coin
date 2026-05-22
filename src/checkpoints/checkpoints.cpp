@@ -189,6 +189,10 @@ namespace cryptonote
     // VINDEX: No hardcoded checkpoints yet — chain is new.
     // Checkpoints will be added here after launch once block hashes are known.
     // First checkpoint will be added at block ~1000 after genesis is confirmed.
+    //
+    // Template for future entries:
+    //   ADD_CHECKPOINT(1000,  "<block_hash_at_height_1000>");
+    //   ADD_CHECKPOINT(10000, "<block_hash_at_height_10000>");
     // ---------------------------------------------------------------------------
     if (nettype == TESTNET)
     {
@@ -244,7 +248,14 @@ namespace cryptonote
   {
     std::vector<std::string> records;
 
-    // Vindex DNS checkpoint domains (to be configured after launch)
+    // ---------------------------------------------------------------------------
+    // VINDEX DNS checkpoint domains
+    // NOTE: These domains must be configured with TXT records in the format:
+    //   "<height>:<block_hash_hex>"
+    // before DNS checkpointing will function. Until the domains are live,
+    // load_txt_records_from_dns() will return an empty set and this function
+    // returns true (no-op), which is safe.
+    // ---------------------------------------------------------------------------
     static const std::vector<std::string> dns_urls = {
       "checkpoints.getvindex.org"
     };
@@ -256,6 +267,10 @@ namespace cryptonote
     };
 
     if (!tools::dns_utils::load_txt_records_from_dns(records, nettype == TESTNET ? testnet_dns_urls : nettype == STAGENET ? stagenet_dns_urls : dns_urls))
+      return true; // DNS unavailable — safe no-op, do not fail startup
+
+    // FIX: early-out guard — if DNS returned an empty set, nothing to do
+    if (records.empty())
       return true;
 
     for (const auto& record : records)
@@ -282,14 +297,15 @@ namespace cryptonote
 
   bool checkpoints::load_new_checkpoints(const std::string &json_hashfile_fullpath, network_type nettype, bool dns)
   {
-    bool result;
-
-    result = load_checkpoints_from_json(json_hashfile_fullpath);
+    // FIX: evaluate both results independently so a JSON load failure does not
+    // short-circuit the DNS load via `result &=`. Both sources are independent
+    // and a failure in one should not suppress errors from the other.
+    bool result_json = load_checkpoints_from_json(json_hashfile_fullpath);
+    bool result_dns = true;
     if (dns)
     {
-      result &= load_checkpoints_from_dns(nettype);
+      result_dns = load_checkpoints_from_dns(nettype);
     }
-
-    return result;
+    return result_json && result_dns;
   }
 }

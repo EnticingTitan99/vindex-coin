@@ -44,6 +44,11 @@
 //   v17: Hybrid Ed25519 + CRYSTALS-Dilithium wallet keys (planned)
 //   v18: Full CRYSTALS-Dilithium (ML-DSA) + Bulletproofs+ (future)
 //   v19: Ring size upgrade to 16 once chain has >100k outputs (planned)
+//
+// IMPORTANT — when activating v17+:
+//   The timestamp field MUST be set to a future UNIX timestamp (>= planned
+//   activation date). Setting it to a past timestamp will trigger immediate
+//   activation on the next block and may break nodes that haven't upgraded.
 // ---------------------------------------------------------------------------
 
 const hardfork_t mainnet_hard_forks[] = {
@@ -66,12 +71,19 @@ const hardfork_t mainnet_hard_forks[] = {
   { 15, 1, 0, 1748044814 },
   { 16, 1, 0, 1748044815 },
   // v17: Ring size 16 + Hybrid PQ signatures (planned ~100k blocks)
+  // REMINDER: set timestamp to a future UTC epoch value before uncommenting
   // { 17, 100000, 0, TBD },
 };
 const size_t num_mainnet_hard_forks = sizeof(mainnet_hard_forks) / sizeof(mainnet_hard_forks[0]);
+// FIX: compile-time guard — ensures hardfork table is never accidentally empty
+static_assert(sizeof(mainnet_hard_forks) / sizeof(mainnet_hard_forks[0]) >= 16,
+  "mainnet_hard_forks must contain at least 16 entries (v1-v16)");
 const uint64_t mainnet_hard_fork_version_1_till = 0;
 
 const hardfork_t testnet_hard_forks[] = {
+  // NOTE: testnet/stagenet timestamps mirror mainnet — intentional for
+  // compress-fork strategy (all protocol versions active from block 1).
+  // If you want a slower testnet rollout, give each entry a distinct future height.
   { 1,  0, 0, 1748044800 },
   { 2,  1, 0, 1748044801 },
   { 3,  1, 0, 1748044802 },

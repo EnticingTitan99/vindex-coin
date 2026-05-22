@@ -51,7 +51,12 @@
 #define CURRENT_TRANSACTION_VERSION                     2
 #define CURRENT_BLOCK_MAJOR_VERSION                     1
 #define CURRENT_BLOCK_MINOR_VERSION                     0
-#define CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT              60*60*2
+// FIX: Tightened from 60*60*2 (2 hours) to 60*30 (30 minutes).
+// A 2-hour future-time window is excessive for a 60s block-time chain — it
+// creates a large DoS surface where an attacker can submit blocks with
+// timestamps far in the future to stall difficulty adjustment.
+// 30 minutes = 30 blocks of leeway, which is generous for clock skew.
+#define CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT              60*30
 #define CRYPTONOTE_DEFAULT_TX_SPENDABLE_AGE             10
 
 #define BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW               60
@@ -93,17 +98,21 @@
 // VINDEX DIFFERENTIATOR 1: Faster block time (60s vs Monero 120s)
 // - 2x faster confirmations for users
 // - More frequent difficulty adjustments = smoother difficulty curve
+// NOTE: DIFFICULTY_WINDOW=720 gives ~12 hours of adjustment history at 60s/block.
+//       Monero uses 720 at 120s/block = ~24 hours. Vindex intentionally halves
+//       this to react faster to hash rate swings on a young chain.
 // ---------------------------------------------------------------------------
 #define DIFFICULTY_TARGET_V2                            60   // seconds (Vindex: 60s, Monero: 120s)
 #define DIFFICULTY_TARGET_V1                            60   // seconds
-#define DIFFICULTY_WINDOW                               720  // blocks
+#define DIFFICULTY_WINDOW                               720  // blocks (~12 hours at 60s/block)
 #define DIFFICULTY_LAG                                  15
 #define DIFFICULTY_CUT                                  60
 #define DIFFICULTY_BLOCKS_COUNT                         DIFFICULTY_WINDOW + DIFFICULTY_LAG
 
 // ---------------------------------------------------------------------------
 // VINDEX DIFFERENTIATOR 2: Tighter ring size default (11 vs Monero 16)
-// Plan: hard fork to 16 once chain has >100k outputs
+// Plan: hard fork to 16 once chain has >100k outputs (v19 roadmap)
+// GUARD: Do NOT lower this below 11 — minimum enforced at HF_VERSION_MIN_MIXIN_10
 // ---------------------------------------------------------------------------
 #define CRYPTONOTE_DEFAULT_RING_SIZE                    11
 
