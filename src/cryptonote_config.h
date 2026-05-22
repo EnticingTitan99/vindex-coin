@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2024, The vindex Project
+// Copyright (c) 2014-2024, The Vindex Project
 // 
 // All rights reserved.
 // 
@@ -35,6 +35,12 @@
 #include <string>
 #include <boost/uuid/uuid.hpp>
 
+// ---------------------------------------------------------------------------
+// VINDEX FORK CONFIGURATION
+// Ticker: VDX | Tagline: Libertatis Vindex (Champion of Liberty)
+// Forked from Monero v0.18.x (Fluorine Fermi)
+// ---------------------------------------------------------------------------
+
 #define CRYPTONOTE_DNS_TIMEOUT_MS                       20000
 
 #define CRYPTONOTE_MAX_BLOCK_NUMBER                     500000000
@@ -52,119 +58,132 @@
 
 // MONEY_SUPPLY - total number coins to be generated
 #define MONEY_SUPPLY                                    ((uint64_t)(-1))
+// Adaptive tail emission is implemented in cryptonote_basic_impl.cpp
+// Base: 0.3 VDX/block, max: 0.6 VDX/block (scales with tx activity)
 #define EMISSION_SPEED_FACTOR_PER_MINUTE                (20)
-#define FINAL_SUBSIDY_PER_MINUTE                        ((uint64_t)300000000000) // 3 * pow(10, 11)
+#define FINAL_SUBSIDY_PER_MINUTE                        ((uint64_t)300000000000) // 0.3 VDX base tail emission
+#define FINAL_SUBSIDY_PER_MINUTE_MAX                    ((uint64_t)600000000000) // 0.6 VDX max tail emission
+// Adaptive emission: if rolling 100-block median tx count > 50 → max subsidy
+//                    if > 10 → base + (tx_count * 6000000000)
+//                    else    → base subsidy
+// See: src/cryptonote_basic/cryptonote_basic_impl.cpp get_block_reward()
 
 #define CRYPTONOTE_REWARD_BLOCKS_WINDOW                 100
-#define CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V2    60000 //size of block (bytes) after which reward for block calculated using block size
-#define CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V1    20000 //size of block (bytes) after which reward for block calculated using block size - before first fork
-#define CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V5    300000 //size of block (bytes) after which reward for block calculated using block size - second change, from v5
-#define CRYPTONOTE_LONG_TERM_BLOCK_WEIGHT_WINDOW_SIZE   100000 // size in blocks of the long term block weight median window
+#define CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V2    60000
+#define CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V1    20000
+#define CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V5    300000
+#define CRYPTONOTE_LONG_TERM_BLOCK_WEIGHT_WINDOW_SIZE   100000
 #define CRYPTONOTE_SHORT_TERM_BLOCK_WEIGHT_SURGE_FACTOR 50
 #define CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE          600
 #define CRYPTONOTE_DISPLAY_DECIMAL_POINT                12
-// COIN - number of smallest units in one coin
-#define COIN                                            ((uint64_t)1000000000000) // pow(10, 12)
+// COIN - number of smallest units in one coin (1 VDX = 10^12 atomic units)
+#define COIN                                            ((uint64_t)1000000000000)
 
-#define FEE_PER_KB_OLD                                  ((uint64_t)10000000000) // pow(10, 10)
-#define FEE_PER_KB                                      ((uint64_t)2000000000) // 2 * pow(10, 9)
+#define FEE_PER_KB_OLD                                  ((uint64_t)10000000000)
+#define FEE_PER_KB                                      ((uint64_t)2000000000)
 #define FEE_PER_BYTE                                    ((uint64_t)300000)
-#define DYNAMIC_FEE_PER_KB_BASE_FEE                     ((uint64_t)2000000000) // 2 * pow(10,9)
-#define DYNAMIC_FEE_PER_KB_BASE_BLOCK_REWARD            ((uint64_t)10000000000000) // 10 * pow(10,12)
+#define DYNAMIC_FEE_PER_KB_BASE_FEE                     ((uint64_t)2000000000)
+#define DYNAMIC_FEE_PER_KB_BASE_BLOCK_REWARD            ((uint64_t)10000000000000)
 #define DYNAMIC_FEE_PER_KB_BASE_FEE_V5                  ((uint64_t)2000000000 * (uint64_t)CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V2 / CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V5)
 #define DYNAMIC_FEE_REFERENCE_TRANSACTION_WEIGHT         ((uint64_t)3000)
 
 #define ORPHANED_BLOCKS_MAX_COUNT                       100
 
-
-#define DIFFICULTY_TARGET_V2                            120  // seconds
-#define DIFFICULTY_TARGET_V1                            60  // seconds - before first fork
-#define DIFFICULTY_WINDOW                               720 // blocks
-#define DIFFICULTY_LAG                                  15  // !!!
-#define DIFFICULTY_CUT                                  60  // timestamps to cut after sorting
+// ---------------------------------------------------------------------------
+// VINDEX DIFFERENTIATOR 1: Faster block time (60s vs Monero 120s)
+// - 2x faster confirmations for users
+// - More frequent difficulty adjustments = smoother difficulty curve
+// ---------------------------------------------------------------------------
+#define DIFFICULTY_TARGET_V2                            60   // seconds (Vindex: 60s, Monero: 120s)
+#define DIFFICULTY_TARGET_V1                            60   // seconds
+#define DIFFICULTY_WINDOW                               720  // blocks
+#define DIFFICULTY_LAG                                  15
+#define DIFFICULTY_CUT                                  60
 #define DIFFICULTY_BLOCKS_COUNT                         DIFFICULTY_WINDOW + DIFFICULTY_LAG
 
+// ---------------------------------------------------------------------------
+// VINDEX DIFFERENTIATOR 2: Tighter ring size default (11 vs Monero 16)
+// Plan: hard fork to 16 once chain has >100k outputs
+// ---------------------------------------------------------------------------
+#define CRYPTONOTE_DEFAULT_RING_SIZE                    11
 
 #define CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_SECONDS_V1   DIFFICULTY_TARGET_V1 * CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_BLOCKS
 #define CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_SECONDS_V2   DIFFICULTY_TARGET_V2 * CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_BLOCKS
 #define CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_BLOCKS       1
 
+#define DIFFICULTY_BLOCKS_ESTIMATE_TIMESPAN             DIFFICULTY_TARGET_V1
 
-#define DIFFICULTY_BLOCKS_ESTIMATE_TIMESPAN             DIFFICULTY_TARGET_V1 //just alias; used by tests
+#define BLOCKS_IDS_SYNCHRONIZING_DEFAULT_COUNT          10000
+#define BLOCKS_IDS_SYNCHRONIZING_MAX_COUNT              25000
+#define BLOCKS_SYNCHRONIZING_DEFAULT_COUNT_PRE_V4       100
+#define BLOCKS_SYNCHRONIZING_DEFAULT_COUNT              20
+#define BLOCKS_SYNCHRONIZING_MAX_COUNT                  2048
+#define BATCH_MAX_WEIGHT                                10
+#define BATCH_MAX_ALLOWED_WEIGHT                        50
+#define BLOCKS_MAX_WINDOW                               CRYPTONOTE_REWARD_BLOCKS_WINDOW
 
+#define CRYPTONOTE_MEMPOOL_TX_LIVETIME                    (86400*3)
+#define CRYPTONOTE_MEMPOOL_TX_FROM_ALT_BLOCK_LIVETIME     604800
 
-#define BLOCKS_IDS_SYNCHRONIZING_DEFAULT_COUNT          10000  //by default, blocks ids count in synchronizing
-#define BLOCKS_IDS_SYNCHRONIZING_MAX_COUNT              25000  //max blocks ids count in synchronizing
-#define BLOCKS_SYNCHRONIZING_DEFAULT_COUNT_PRE_V4       100    //by default, blocks count in blocks downloading
-#define BLOCKS_SYNCHRONIZING_DEFAULT_COUNT              20     //by default, blocks count in blocks downloading
-#define BLOCKS_SYNCHRONIZING_MAX_COUNT                  2048   //must be a power of 2, greater than 128, equal to SEEDHASH_EPOCH_BLOCKS
-#define BATCH_MAX_WEIGHT                                10     //by default, maximum size of batch in [mB]
-#define BATCH_MAX_ALLOWED_WEIGHT                        50     //maximum allowed size of batch in [mB]
-#define BLOCKS_MAX_WINDOW                               CRYPTONOTE_REWARD_BLOCKS_WINDOW  //Window to find the historical max block weight (100 blocks)
+#define CRYPTONOTE_DANDELIONPP_STEMS              2
+#define CRYPTONOTE_DANDELIONPP_FLUFF_PROBABILITY 20
+#define CRYPTONOTE_DANDELIONPP_MIN_EPOCH         10
+#define CRYPTONOTE_DANDELIONPP_EPOCH_RANGE       30
+#define CRYPTONOTE_DANDELIONPP_FLUSH_AVERAGE      5
+#define CRYPTONOTE_DANDELIONPP_EMBARGO_AVERAGE   39
 
-#define CRYPTONOTE_MEMPOOL_TX_LIVETIME                    (86400*3) //seconds, three days
-#define CRYPTONOTE_MEMPOOL_TX_FROM_ALT_BLOCK_LIVETIME     604800 //seconds, one week
+#define CRYPTONOTE_NOISE_MIN_EPOCH                      5
+#define CRYPTONOTE_NOISE_EPOCH_RANGE                    30
+#define CRYPTONOTE_NOISE_MIN_DELAY                      10
+#define CRYPTONOTE_NOISE_DELAY_RANGE                    5
+#define CRYPTONOTE_NOISE_BYTES                          3*1024
+#define CRYPTONOTE_NOISE_CHANNELS                       2
 
-
-#define CRYPTONOTE_DANDELIONPP_STEMS              2 // number of outgoing stem connections per epoch
-#define CRYPTONOTE_DANDELIONPP_FLUFF_PROBABILITY 20 // out of 100
-#define CRYPTONOTE_DANDELIONPP_MIN_EPOCH         10 // minutes
-#define CRYPTONOTE_DANDELIONPP_EPOCH_RANGE       30 // seconds
-#define CRYPTONOTE_DANDELIONPP_FLUSH_AVERAGE      5 // seconds average for poisson distributed fluff flush
-#define CRYPTONOTE_DANDELIONPP_EMBARGO_AVERAGE   39 // seconds (see tx_pool.cpp for more info)
-
-// see src/cryptonote_protocol/levin_notify.cpp
-#define CRYPTONOTE_NOISE_MIN_EPOCH                      5      // minutes
-#define CRYPTONOTE_NOISE_EPOCH_RANGE                    30     // seconds
-#define CRYPTONOTE_NOISE_MIN_DELAY                      10     // seconds
-#define CRYPTONOTE_NOISE_DELAY_RANGE                    5      // seconds
-#define CRYPTONOTE_NOISE_BYTES                          3*1024 // 3 KiB
-#define CRYPTONOTE_NOISE_CHANNELS                       2      // Max outgoing connections per zone used for noise/covert sending
-
-// Both below are in seconds. The idea is to delay forwarding from i2p/tor
-// to ipv4/6, such that 2+ incoming connections _could_ have sent the tx
 #define CRYPTONOTE_FORWARD_DELAY_BASE (CRYPTONOTE_NOISE_MIN_DELAY + CRYPTONOTE_NOISE_DELAY_RANGE)
 #define CRYPTONOTE_FORWARD_DELAY_AVERAGE (CRYPTONOTE_FORWARD_DELAY_BASE + (CRYPTONOTE_FORWARD_DELAY_BASE / 2))
 
-#define CRYPTONOTE_MAX_FRAGMENTS                        20 // ~20 * NOISE_BYTES max payload size for covert/noise send
+#define CRYPTONOTE_MAX_FRAGMENTS                        20
 
 #define COMMAND_RPC_GET_BLOCKS_FAST_MAX_BLOCK_COUNT     1000
 #define COMMAND_RPC_GET_BLOCKS_FAST_MAX_TX_COUNT        20000
 #define DEFAULT_RPC_MAX_CONNECTIONS_PER_PUBLIC_IP       3
 #define DEFAULT_RPC_MAX_CONNECTIONS_PER_PRIVATE_IP      25
 #define DEFAULT_RPC_MAX_CONNECTIONS                     100
-#define DEFAULT_RPC_SOFT_LIMIT_SIZE                     25 * 1024 * 1024 // 25 MiB
-#define MAX_RPC_CONTENT_LENGTH                          1048576 // 1 MB
+#define DEFAULT_RPC_SOFT_LIMIT_SIZE                     25 * 1024 * 1024
+#define MAX_RPC_CONTENT_LENGTH                          1048576
 
 #define P2P_LOCAL_WHITE_PEERLIST_LIMIT                  1000
 #define P2P_LOCAL_GRAY_PEERLIST_LIMIT                   5000
 
 #define P2P_DEFAULT_CONNECTIONS_COUNT                   12
-#define P2P_DEFAULT_HANDSHAKE_INTERVAL                  60           //secondes
-#define P2P_DEFAULT_PACKET_MAX_SIZE                     50000000     //50000000 bytes maximum packet size
+#define P2P_DEFAULT_HANDSHAKE_INTERVAL                  60
+#define P2P_DEFAULT_PACKET_MAX_SIZE                     50000000
 #define P2P_DEFAULT_PEERS_IN_HANDSHAKE                  250
 #define P2P_MAX_PEERS_IN_HANDSHAKE                      250
-#define P2P_DEFAULT_CONNECTION_TIMEOUT                  5000       //5 seconds
-#define P2P_DEFAULT_SOCKS_CONNECT_TIMEOUT               45         // seconds
-#define P2P_DEFAULT_PING_CONNECTION_TIMEOUT             2000       //2 seconds
-#define P2P_DEFAULT_INVOKE_TIMEOUT                      60*2*1000  //2 minutes
-#define P2P_DEFAULT_HANDSHAKE_INVOKE_TIMEOUT            5000       //5 seconds
+#define P2P_DEFAULT_CONNECTION_TIMEOUT                  5000
+#define P2P_DEFAULT_SOCKS_CONNECT_TIMEOUT               45
+#define P2P_DEFAULT_PING_CONNECTION_TIMEOUT             2000
+#define P2P_DEFAULT_INVOKE_TIMEOUT                      60*2*1000
+#define P2P_DEFAULT_HANDSHAKE_INVOKE_TIMEOUT            5000
 #define P2P_DEFAULT_WHITELIST_CONNECTIONS_PERCENT       70
 #define P2P_DEFAULT_ANCHOR_CONNECTIONS_COUNT            2
 #define P2P_DEFAULT_SYNC_SEARCH_CONNECTIONS_COUNT       2
-#define P2P_DEFAULT_LIMIT_RATE_UP                       8192       // kB/s
-#define P2P_DEFAULT_LIMIT_RATE_DOWN                     32768       // kB/s
+#define P2P_DEFAULT_LIMIT_RATE_UP                       8192
+#define P2P_DEFAULT_LIMIT_RATE_DOWN                     32768
 
-#define P2P_FAILED_ADDR_FORGET_SECONDS                  (60*60)     //1 hour
-#define P2P_IP_BLOCKTIME                                (60*60*24)  //24 hour
+#define P2P_FAILED_ADDR_FORGET_SECONDS                  (60*60)
+#define P2P_IP_BLOCKTIME                                (60*60*24)
 #define P2P_IP_FAILS_BEFORE_BLOCK                       10
-#define P2P_IDLE_CONNECTION_KILL_INTERVAL               (5*60) //5 minutes
+#define P2P_IDLE_CONNECTION_KILL_INTERVAL               (5*60)
 
 #define P2P_SUPPORT_FLAG_FLUFFY_BLOCKS                  0x01
 #define P2P_SUPPORT_FLAGS                               P2P_SUPPORT_FLAG_FLUFFY_BLOCKS
 
 #define RPC_IP_FAILS_BEFORE_BLOCK                       3
 
+// ---------------------------------------------------------------------------
+// VINDEX IDENTITY
+// ---------------------------------------------------------------------------
 #define CRYPTONOTE_NAME                         "bitvindex"
 #define CRYPTONOTE_BLOCKCHAINDATA_FILENAME      "data.mdb"
 #define CRYPTONOTE_BLOCKCHAINDATA_LOCK_FILENAME "lock.mdb"
@@ -202,43 +221,63 @@
 
 #define HASH_OF_HASHES_STEP                     512
 
-#define DEFAULT_TXPOOL_MAX_WEIGHT               648000000ull // 3 days at 300000, in bytes
+#define DEFAULT_TXPOOL_MAX_WEIGHT               648000000ull
 
 #define BULLETPROOF_MAX_OUTPUTS                 16
 #define BULLETPROOF_PLUS_MAX_OUTPUTS            16
 
-#define CRYPTONOTE_PRUNING_STRIPE_SIZE          4096 // the smaller, the smoother the increase
-#define CRYPTONOTE_PRUNING_LOG_STRIPES          3 // the higher, the more space saved
-#define CRYPTONOTE_PRUNING_TIP_BLOCKS           5500 // the smaller, the more space saved
+#define CRYPTONOTE_PRUNING_STRIPE_SIZE          4096
+#define CRYPTONOTE_PRUNING_LOG_STRIPES          3
+#define CRYPTONOTE_PRUNING_TIP_BLOCKS           5500
 
 #define RPC_CREDITS_PER_HASH_SCALE ((float)(1<<24))
 
 #define DNS_BLOCKLIST_LIFETIME (86400 * 8)
 
-//The limit is enough for the mandatory transaction content with 16 outputs (547 bytes),
-//a custom tag (1 byte) and up to 32 bytes of custom data for each recipient.
-// (1+32) + (1+1+16*32) + (1+16*32) = 1060
 #define MAX_TX_EXTRA_SIZE                       1060
 
 // New constants are intended to go here
 namespace config
 {
-  uint64_t const DEFAULT_FEE_ATOMIC_VDX_PER_KB = 500; // Just a placeholder!  Change me!
+  uint64_t const DEFAULT_FEE_ATOMIC_VDX_PER_KB = 500;
   uint8_t const FEE_CALCULATION_MAX_RETRIES = 10;
-  uint64_t const DEFAULT_DUST_THRESHOLD = ((uint64_t)2000000000); // 2 * pow(10, 9)
-  uint64_t const BASE_REWARD_CLAMP_THRESHOLD = ((uint64_t)100000000); // pow(10, 8)
+  uint64_t const DEFAULT_DUST_THRESHOLD = ((uint64_t)2000000000);
+  uint64_t const BASE_REWARD_CLAMP_THRESHOLD = ((uint64_t)100000000);
 
-  uint64_t const CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX = 18;
-  uint64_t const CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX = 19;
-  uint64_t const CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX = 42;
-  uint16_t const P2P_DEFAULT_PORT = 18080;
-  uint16_t const RPC_DEFAULT_PORT = 18081;
-  uint16_t const ZMQ_RPC_DEFAULT_PORT = 18082;
+  // ---------------------------------------------------------------------------
+  // VINDEX MAINNET — Address prefixes chosen so addresses start with 'V'
+  // Base58 prefix 20 → leading character 'V' for standard addresses
+  // Use: https://xmr.llcoins.net/addresstests.html to verify
+  // ---------------------------------------------------------------------------
+  uint64_t const CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX = 20;            // 'V'
+  uint64_t const CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX = 21; // 'Vi'
+  uint64_t const CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX = 43;         // 'Vs'
+
+  // ---------------------------------------------------------------------------
+  // VINDEX PORTS — distinct from Monero (18080) to prevent accidental peering
+  // ---------------------------------------------------------------------------
+  uint16_t const P2P_DEFAULT_PORT = 28080;
+  uint16_t const RPC_DEFAULT_PORT = 28081;
+  uint16_t const ZMQ_RPC_DEFAULT_PORT = 28082;
+
+  // ---------------------------------------------------------------------------
+  // VINDEX NETWORK ID — unique 16 magic bytes, prevents peering with Monero
+  // Generated: 2026-05-22. Do NOT reuse Monero's bytes.
+  // ---------------------------------------------------------------------------
   boost::uuids::uuid const NETWORK_ID = { {
-      0x12 ,0x30, 0xF1, 0x71 , 0x61, 0x04 , 0x41, 0x61, 0x17, 0x31, 0x00, 0x82, 0x16, 0xA1, 0xA1, 0x10
-    } }; // Bender's nightmare
-  std::string const GENESIS_TX = "013c01ff0001ffffffffffff03029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd08807121017767aafcde9be00dcfd098715ebcf7f410daebc582fda69d24a28e9d0bc890d1";
-  uint32_t const GENESIS_NONCE = 10000;
+      0x56, 0x44, 0x58, 0x4e, 0x45, 0x54, 0x20, 0x4c,
+      0x49, 0x42, 0x45, 0x52, 0x54, 0x41, 0x54, 0x49
+    } }; // "VDXNET LIBERTATI" in ASCII
+
+  // ---------------------------------------------------------------------------
+  // GENESIS BLOCK — TWO-PASS GENERATION REQUIRED
+  // PASS 1: Set GENESIS_TX = "" below, compile, run: ./vindexd --print-genesis-tx
+  //         Copy the hex output, paste below, set GENESIS_NONCE = 10001, recompile.
+  // PASS 2: Paste hex from Pass 1 output here.
+  // STATUS: PASS 1 PENDING — set empty string to trigger genesis generation
+  // ---------------------------------------------------------------------------
+  std::string const GENESIS_TX = ""; // PASS 1: intentionally empty — run ./vindexd --print-genesis-tx
+  uint32_t const GENESIS_NONCE = 10001; // distinct from Monero's 10000
 
   // Hash domain separators
   const char HASH_KEY_BULLETPROOF_EXPONENT[] = "bulletproof";
@@ -266,7 +305,6 @@ namespace config
   const constexpr char HASH_KEY_MULTISIG_TX_PRIVKEYS[] = "multisig_tx_privkeys";
   const constexpr char HASH_KEY_TXHASH_AND_MIXRING[] = "txhash_and_mixring";
 
-  // Multisig
   const uint32_t MULTISIG_MAX_SIGNERS{16};
 
   namespace testnet
@@ -274,14 +312,15 @@ namespace config
     uint64_t const CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX = 53;
     uint64_t const CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX = 54;
     uint64_t const CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX = 63;
-    uint16_t const P2P_DEFAULT_PORT = 28080;
-    uint16_t const RPC_DEFAULT_PORT = 28081;
-    uint16_t const ZMQ_RPC_DEFAULT_PORT = 28082;
+    uint16_t const P2P_DEFAULT_PORT = 38080;
+    uint16_t const RPC_DEFAULT_PORT = 38081;
+    uint16_t const ZMQ_RPC_DEFAULT_PORT = 38082;
     boost::uuids::uuid const NETWORK_ID = { {
-        0x12 ,0x30, 0xF1, 0x71 , 0x61, 0x04 , 0x41, 0x61, 0x17, 0x31, 0x00, 0x82, 0x16, 0xA1, 0xA1, 0x11
-      } }; // Bender's daydream
-    std::string const GENESIS_TX = "013c01ff0001ffffffffffff03029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd08807121017767aafcde9be00dcfd098715ebcf7f410daebc582fda69d24a28e9d0bc890d1";
-    uint32_t const GENESIS_NONCE = 10001;
+        0x56, 0x44, 0x58, 0x4e, 0x45, 0x54, 0x20, 0x4c,
+        0x49, 0x42, 0x45, 0x52, 0x54, 0x41, 0x54, 0x4a
+      } }; // "VDXNET LIBERTATJ"
+    std::string const GENESIS_TX = "";
+    uint32_t const GENESIS_NONCE = 10002;
   }
 
   namespace stagenet
@@ -289,14 +328,15 @@ namespace config
     uint64_t const CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX = 24;
     uint64_t const CRYPTONOTE_PUBLIC_INTEGRATED_ADDRESS_BASE58_PREFIX = 25;
     uint64_t const CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX = 36;
-    uint16_t const P2P_DEFAULT_PORT = 38080;
-    uint16_t const RPC_DEFAULT_PORT = 38081;
-    uint16_t const ZMQ_RPC_DEFAULT_PORT = 38082;
+    uint16_t const P2P_DEFAULT_PORT = 48080;
+    uint16_t const RPC_DEFAULT_PORT = 48081;
+    uint16_t const ZMQ_RPC_DEFAULT_PORT = 48082;
     boost::uuids::uuid const NETWORK_ID = { {
-        0x12 ,0x30, 0xF1, 0x71 , 0x61, 0x04 , 0x41, 0x61, 0x17, 0x31, 0x00, 0x82, 0x16, 0xA1, 0xA1, 0x12
-      } }; // Bender's daydream
+        0x56, 0x44, 0x58, 0x4e, 0x45, 0x54, 0x20, 0x4c,
+        0x49, 0x42, 0x45, 0x52, 0x54, 0x41, 0x54, 0x4b
+      } }; // "VDXNET LIBERTATK"
     std::string const GENESIS_TX = "013c01ff0001ffffffffffff0302df5d56da0c7d643ddd1ce61901c7bdc5fb1738bfe39fbe69c28a3a7032729c0f2101168d0c4ca86fb55a4cf6a36d31431be1c53a3bd7411bb24e8832410289fa6f3b";
-    uint32_t const GENESIS_NONCE = 10002;
+    uint32_t const GENESIS_NONCE = 10003;
   }
 }
 
