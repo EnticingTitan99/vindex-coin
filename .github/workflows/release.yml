@@ -13,43 +13,92 @@ jobs:
         include:
           - os: ubuntu-22.04
             target: linux-amd64
-          - os: ubuntu-22.04
-            target: linux-arm64
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
+
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-release-${{ runner.os }}-${{ github.sha }}
+          restore-keys: ccache-release-${{ runner.os }}-
 
       - name: Install build dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get update
+          sudo apt-get update -qq
           sudo apt-get install -y \
-            build-essential cmake pkg-config \
+            build-essential cmake pkg-config ccache git \
             libssl-dev libzmq3-dev libunbound-dev \
             libsodium-dev libunwind8-dev liblzma-dev \
             libreadline6-dev libexpat1-dev \
-            libboost-all-dev python3 ccache git
+            libboost-chrono-dev libboost-date-time-dev \
+            libboost-filesystem-dev libboost-locale-dev \
+            libboost-program-options-dev libboost-regex-dev \
+            libboost-serialization-dev libboost-system-dev \
+            libboost-thread-dev python3
 
-      - name: Build (static release)
-        run: make release-static -j$(nproc)
+      - name: Initialise submodules (safety net)
+        run: git submodule update --init --force
+
+      - name: Configure CMake (Release)
+        run: |
+          mkdir -p build/Linux/main/release
+          cd build/Linux/main/release
+          cmake \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DBUILD_TESTS=OFF \
+            -DUSE_DEVICE_TREZOR=OFF \
+            ../../../..
+
+      - name: Build vindexd and vindex-wallet-rpc
+        run: |
+          cd build/Linux/main/release
+          make -j$(nproc) daemon wallet_rpc
+
+      - name: Confirm binaries exist
+        run: |
+          for bin in vindexd vindex-wallet-rpc; do
+            if [ ! -f "build/Linux/main/release/bin/$bin" ]; then
+              echo "::error::$bin binary not found after build!"
+              exit 1
+            fi
+            echo "$(build/Linux/main/release/bin/$bin --version 2>/dev/null || echo "$bin OK")"
+          done
 
       - name: Package binaries
         run: |
           mkdir -p dist
-          cp build/release/bin/* dist/
+          cp build/Linux/main/release/bin/vindexd dist/
+          cp build/Linux/main/release/bin/vindex-wallet-rpc dist/
           tar -czvf vindex-${{ github.ref_name }}-${{ matrix.target }}.tar.gz -C dist .
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          name: Vindex ${{ github.ref_name }}
           files: vindex-${{ github.ref_name }}-${{ matrix.target }}.tar.gz
           draft: true
-          prerelease: true
+          prerelease: ${{ contains(github.ref_name, 'testnet') || contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') }}
           body: |
             ## Vindex ${{ github.ref_name }}
 
             *Libertatis Vindex* — Champion of Liberty
 
             A privacy-first Monero fork. See README for full build instructions.
+
+            ### Network Ports
+            | Network  | P2P   | RPC   | ZMQ   |
+            |----------|-------|-------|-------|
+            | Mainnet  | 28080 | 28081 | 28082 |
+            | Testnet  | 38080 | 38081 | 38082 |
+            | Stagenet | 48080 | 48081 | 48082 |
+            | Wallet RPC | —   | 18083 |  —    |
+
+            Network ID: `VDXNET LIBERTATJ`

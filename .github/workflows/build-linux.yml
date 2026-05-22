@@ -37,7 +37,7 @@ jobs:
           echo "All required submodules are populated."
 
   build-linux:
-    name: Build vindexd (Ubuntu 22.04)
+    name: Build vindexd + vindex-wallet-rpc (Ubuntu 22.04)
     runs-on: ubuntu-22.04
     needs: submodule-check
     steps:
@@ -89,22 +89,31 @@ jobs:
             -DUSE_DEVICE_TREZOR=OFF \
             ../../../..
 
-      - name: Build vindexd
+      - name: Build vindexd and vindex-wallet-rpc
         run: |
           cd build/Linux/main/release
-          make -j$(nproc) daemon
+          make -j$(nproc) daemon wallet_rpc
 
-      - name: Confirm binary exists
+      - name: Confirm binaries exist
         run: |
-          if [ ! -f "build/Linux/main/release/bin/vindexd" ]; then
-            echo "::error::vindexd binary not found after build!"
-            exit 1
-          fi
-          echo "Build successful: $(build/Linux/main/release/bin/vindexd --version || true)"
+          for bin in vindexd vindex-wallet-rpc; do
+            if [ ! -f "build/Linux/main/release/bin/$bin" ]; then
+              echo "::error::$bin binary not found after build!"
+              exit 1
+            fi
+            echo "Build successful: $(build/Linux/main/release/bin/$bin --version 2>/dev/null || echo "$bin OK")"
+          done
 
       - name: Upload vindexd artifact
         uses: actions/upload-artifact@v4
         with:
           name: vindexd-linux-amd64-${{ github.sha }}
           path: build/Linux/main/release/bin/vindexd
+          retention-days: 14
+
+      - name: Upload vindex-wallet-rpc artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vindex-wallet-rpc-linux-amd64-${{ github.sha }}
+          path: build/Linux/main/release/bin/vindex-wallet-rpc
           retention-days: 14
