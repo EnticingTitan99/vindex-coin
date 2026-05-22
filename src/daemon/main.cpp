@@ -212,10 +212,10 @@ int main(int argc, char const * argv[])
     {
       cryptonote::block bl;
       cryptonote::blobdata tx_bl;
-      bool r = epee::string_tools::parse_hexstr_to_binbuff(std::string(GENESIS_TX), tx_bl);
+      bool r = epee::string_tools::parse_hexstr_to_binbuff(std::string(config::GENESIS_TX), tx_bl);
       if (!r)
       {
-        std::cout << "Failed to parse genesis tx hex: " << GENESIS_TX << std::endl;
+        std::cout << "Failed to parse genesis tx hex: " << config::GENESIS_TX << std::endl;
         return 1;
       }
       r = parse_and_validate_tx_from_blob(tx_bl, bl.miner_tx);
@@ -228,7 +228,7 @@ int main(int argc, char const * argv[])
       bl.minor_version = CURRENT_BLOCK_MINOR_VERSION;
       bl.timestamp = 0;
       bl.nonce = 10000;
-      miner::find_nonce_for_given_block([](const cryptonote::block &b, uint64_t height, const crypto::hash *seed_hash, unsigned int threads, crypto::hash &hash){
+      cryptonote::miner::find_nonce_for_given_block([](const cryptonote::block &b, uint64_t height, const crypto::hash *seed_hash, unsigned int threads, crypto::hash &hash){
         return cryptonote::get_block_longhash(NULL, b, hash, height, seed_hash, threads);
       }, bl, 1, 0, NULL);
       std::cout << "";
