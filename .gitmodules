@@ -6,8 +6,7 @@
 	url = https://github.com/tevador/RandomX
 [submodule "external/supercop"]
 	path = external/supercop
-	url = https://github.com/vindex-project/supercop
-	branch = vindex
+	url = https://github.com/monero-project/supercop
 [submodule "external/gtest"]
 	path = external/gtest
 	url = https://github.com/google/googletest.git

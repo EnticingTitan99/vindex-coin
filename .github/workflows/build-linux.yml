@@ -24,8 +24,8 @@ jobs:
       - name: Verify required submodules are populated
         run: |
           MISSING=()
-          for dir in external/rapidjson external/randomx external/gtest; do
-            if [ ! -f "$dir/CMakeLists.txt" ] && [ ! -f "$dir/include/rapidjson/rapidjson.h" ] && [ -z "$(ls -A $dir 2>/dev/null)" ]; then
+          for dir in external/rapidjson external/randomx external/supercop external/gtest; do
+            if [ -z "$(ls -A "$dir" 2>/dev/null)" ]; then
               MISSING+=("$dir")
             fi
           done
@@ -34,7 +34,7 @@ jobs:
             for m in "${MISSING[@]}"; do echo "  - $m"; done
             echo ""
             echo "Fix locally with:"
-            echo "  git submodule update --init --force"
+            echo "  git submodule update --init --recursive"
             exit 1
           fi
           echo "All required submodules are populated."
@@ -78,7 +78,7 @@ jobs:
             libboost-thread-dev python3
 
       - name: Initialise submodules (safety net)
-        run: git submodule update --init --force
+        run: git submodule update --init --recursive
 
       - name: Configure CMake (Release)
         run: |
