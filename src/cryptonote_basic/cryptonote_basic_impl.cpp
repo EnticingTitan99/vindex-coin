@@ -88,10 +88,14 @@ namespace cryptonote {
 
     uint64_t base_reward = (MONEY_SUPPLY - already_generated_coins) >> emission_speed_factor;
     uint64_t tail_subsidy = FINAL_SUBSIDY_PER_MINUTE * target_minutes;
+
+    // Hoist full_reward_zone here so both the adaptive-emission block and the
+    // penalty-path below share the same computed value (single call site).
+    uint64_t full_reward_zone = get_min_block_weight(version);
+
     // Vindex Adaptive Tail Emission: scales from base (0.3 VDX) to max (0.6 VDX) based on tx activity
     // Activity is proxied by median_weight vs full_reward_zone
     if (version >= 10) { // Activate adaptive emission from HF v10
-      uint64_t full_reward_zone = get_min_block_weight(version);
       if (median_weight > full_reward_zone) {
         uint64_t activity_scale = std::min((uint64_t)100, (uint64_t)((median_weight - full_reward_zone) * 100 / full_reward_zone));
         tail_subsidy += (FINAL_SUBSIDY_PER_MINUTE_MAX - FINAL_SUBSIDY_PER_MINUTE) * target_minutes * activity_scale / 100;
@@ -102,8 +106,6 @@ namespace cryptonote {
     {
       base_reward = tail_subsidy;
     }
-
-    uint64_t full_reward_zone = get_min_block_weight(version);
 
     //make it soft
     if (median_weight < full_reward_zone) {

@@ -102,9 +102,86 @@ jobs:
           fi
           echo "Build successful: $(build/Linux/main/release/bin/vindexd --version || true)"
 
+      - name: Smoke-test version string branding
+        run: |
+          VERSION_OUT=$(build/Linux/main/release/bin/vindexd --version 2>&1 || true)
+          echo "Version output: $VERSION_OUT"
+          if echo "$VERSION_OUT" | grep -qi "monero"; then
+            echo "::error::vindexd --version output contains 'monero' — upstream rebrand is incomplete!"
+            exit 1
+          fi
+          if ! echo "$VERSION_OUT" | grep -qi "vindex"; then
+            echo "::error::vindexd --version output does not contain 'vindex' — branding may be missing."
+            exit 1
+          fi
+          echo "Branding check passed."
+
       - name: Upload vindexd artifact
         uses: actions/upload-artifact@v4
         with:
           name: vindexd-linux-amd64-${{ github.sha }}
           path: build/Linux/main/release/bin/vindexd
           retention-days: 14
+
+  build-linux-tests:
+    name: Build & Run Unit Tests (Ubuntu 22.04)
+    runs-on: ubuntu-22.04
+    needs: submodule-check
+    steps:
+      - name: Checkout with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt
+          key: apt-${{ runner.os }}-vindex-deps-v2
+
+      - name: Cache ccache (tests)
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-tests-${{ runner.os }}-${{ github.sha }}
+          restore-keys: ccache-tests-${{ runner.os }}-
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y \
+            build-essential cmake pkg-config ccache git \
+            libssl-dev libzmq3-dev libunbound-dev \
+            libsodium-dev libunwind8-dev liblzma-dev \
+            libreadline6-dev libexpat1-dev \
+            libboost-chrono-dev libboost-date-time-dev \
+            libboost-filesystem-dev libboost-locale-dev \
+            libboost-program-options-dev libboost-regex-dev \
+            libboost-serialization-dev libboost-system-dev \
+            libboost-thread-dev python3
+
+      - name: Initialise submodules (safety net)
+        run: git submodule update --init --force
+
+      - name: Configure CMake (Debug + Tests)
+        run: |
+          mkdir -p build/Linux/main/tests
+          cd build/Linux/main/tests
+          cmake \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DBUILD_TESTS=ON \
+            -DUSE_DEVICE_TREZOR=OFF \
+            ../../../..
+
+      - name: Build tests
+        run: |
+          cd build/Linux/main/tests
+          make -j$(nproc) VERBOSE=0
+
+      - name: Run unit tests
+        run: |
+          cd build/Linux/main/tests
+          ctest --output-on-failure -j$(nproc) --timeout 120
