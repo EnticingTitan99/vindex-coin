@@ -33,7 +33,7 @@
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "entitlements": "assets/entitlements.mac.plist",
-      "entitlementsInherit": "assets/entitlements.mac.plist"
+      "entitlementsInherit": "assets/entitlements.mac.inherit.plist"
     },
     "dmg": {
       "title": "Vindex Wallet ${version}",
@@ -60,7 +60,7 @@
     }
   },
   "dependencies": {
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^2.7.0"
   },
   "devDependencies": {
     "electron": "^29.0.0",
