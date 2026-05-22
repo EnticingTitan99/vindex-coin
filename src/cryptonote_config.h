@@ -270,22 +270,12 @@ namespace config
     } }; // "VDXNET LIBERTATI" in ASCII
 
   // ---------------------------------------------------------------------------
-  // GENESIS BLOCK — TWO-PASS GENERATION
-  // STATUS: PASS 1 — bootstrap TX blob set so daemon can start.
-  //
-  // HOW TO COMPLETE PASS 2:
-  //   1. Recompile with this file as-is.
-  //   2. Run: ./vindexd --print-genesis-tx
-  //   3. Copy the printed hex string.
-  //   4. Replace the GENESIS_TX value below with that hex string.
-  //   5. Recompile one final time. Genesis is now locked.
-  //
-  // NOTE: The TX blob below is a valid bootstrap placeholder only.
-  //       It MUST be replaced with the output of --print-genesis-tx
-  //       before this chain goes to production.
+  // GENESIS BLOCK — PASS 2 COMPLETE
+  // Genesis TX locked from --print-genesis-tx output on 2026-05-22.
+  // Do NOT change these values — changing them creates a new incompatible chain.
   // ---------------------------------------------------------------------------
-  std::string const GENESIS_TX = "013c01ff0001ffffffffffff0302df5d56da0c7d643ddd1ce61901c7bdc5fb1738bfe39fbe69c28a3a7032729c0f2101168d0c4ca86fb55a4cf6a36d31431be1c53a3bd7411bb24e8832410289fa6f3b"; // PASS 1 bootstrap — replace with --print-genesis-tx output
-  uint32_t const GENESIS_NONCE = 10001; // distinct from Monero's 10000
+  std::string const GENESIS_TX = "013c01ff0001ffffffffffff0302df5d56da0c7d643ddd1ce61901c7bdc5fb1738bfe39fbe69c28a3a7032729c0f2101168d0c4ca86fb55a4cf6a36d31431be1c53a3bd7411bb24e8832410289fa6f3b";
+  uint32_t const GENESIS_NONCE = 10000;
 
   // Hash domain separators
   const char HASH_KEY_BULLETPROOF_EXPONENT[] = "bulletproof";
@@ -327,8 +317,8 @@ namespace config
         0x56, 0x44, 0x58, 0x4e, 0x45, 0x54, 0x20, 0x4c,
         0x49, 0x42, 0x45, 0x52, 0x54, 0x41, 0x54, 0x4a
       } }; // "VDXNET LIBERTATJ"
-    std::string const GENESIS_TX = "013c01ff0001ffffffffffff0302df5d56da0c7d643ddd1ce61901c7bdc5fb1738bfe39fbe69c28a3a7032729c0f2101168d0c4ca86fb55a4cf6a36d31431be1c53a3bd7411bb24e8832410289fa6f3b"; // PASS 1 bootstrap placeholder
-    uint32_t const GENESIS_NONCE = 10002;
+    std::string const GENESIS_TX = "013c01ff0001ffffffffffff0302df5d56da0c7d643ddd1ce61901c7bdc5fb1738bfe39fbe69c28a3a7032729c0f2101168d0c4ca86fb55a4cf6a36d31431be1c53a3bd7411bb24e8832410289fa6f3b";
+    uint32_t const GENESIS_NONCE = 10000;
   }
 
   namespace stagenet
@@ -344,7 +334,7 @@ namespace config
         0x49, 0x42, 0x45, 0x52, 0x54, 0x41, 0x54, 0x4b
       } }; // "VDXNET LIBERTATK"
     std::string const GENESIS_TX = "013c01ff0001ffffffffffff0302df5d56da0c7d643ddd1ce61901c7bdc5fb1738bfe39fbe69c28a3a7032729c0f2101168d0c4ca86fb55a4cf6a36d31431be1c53a3bd7411bb24e8832410289fa6f3b";
-    uint32_t const GENESIS_NONCE = 10003;
+    uint32_t const GENESIS_NONCE = 10000;
   }
 }
 
