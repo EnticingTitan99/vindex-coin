@@ -1,0 +1,13 @@
+#define DEF_vindex_VERSION_TAG "@VERSIONTAG@"
+#define DEF_vindex_VERSION "0.18.1.0"
+#define DEF_vindex_RELEASE_NAME "Fluorine Fermi"
+#define DEF_vindex_VERSION_FULL DEF_vindex_VERSION "-" DEF_vindex_VERSION_TAG
+#define DEF_vindex_VERSION_IS_RELEASE @VERSION_IS_RELEASE@
+
+#include "version.h"
+
+const char* const vindex_VERSION_TAG = DEF_vindex_VERSION_TAG;
+const char* const vindex_VERSION = DEF_vindex_VERSION;
+const char* const vindex_RELEASE_NAME = DEF_vindex_RELEASE_NAME;
+const char* const vindex_VERSION_FULL = DEF_vindex_VERSION_FULL;
+const bool vindex_VERSION_IS_RELEASE = DEF_vindex_VERSION_IS_RELEASE;

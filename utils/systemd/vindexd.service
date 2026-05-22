@@ -1,0 +1,20 @@
+[Unit]
+Description=vindex Full Node
+After=network-online.target
+
+[Service]
+User=vindex
+Group=vindex
+WorkingDirectory=~
+StateDirectory=vindex
+LogsDirectory=vindex
+
+Type=simple
+ExecStart=/usr/bin/vindexd --config-file /etc/vindexd.conf --non-interactive
+StandardOutput=null
+StandardError=null
+
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

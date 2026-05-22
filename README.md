@@ -1,0 +1,773 @@
+# vindex
+
+Copyright (c) 2014-2024, The vindex Project
+Portions Copyright (c) 2012-2013 The Cryptonote developers.
+
+## Table of Contents
+
+  - [Development resources](#development-resources)
+  - [Vulnerability response](#vulnerability-response)
+  - [Research](#research)
+  - [Announcements](#announcements)
+  - [Translations](#translations)
+  - [Coverage](#coverage)
+  - [Introduction](#introduction)
+  - [About this project](#about-this-project)
+  - [Supporting the project](#supporting-the-project)
+  - [License](#license)
+  - [Contributing](#contributing)
+  - [Scheduled software upgrades](#scheduled-softwarenetwork-upgrades)
+  - [Release staging schedule and protocol](#release-staging-schedule-and-protocol)
+  - [Compiling vindex from source](#compiling-vindex-from-source)
+    - [Dependencies](#dependencies)
+    - [Guix builds](#guix-builds)
+  - [Internationalization](#Internationalization)
+  - [Using Tor](#using-tor)
+  - [Pruning](#Pruning)
+  - [Debugging](#Debugging)
+  - [Known issues](#known-issues)
+
+## Development resources
+
+- Web: [getvindex.org](https://getvindex.org)
+- Mail: [dev@getvindex.org](mailto:dev@getvindex.org)
+- GitHub: [https://github.com/vindex-project/vindex](https://github.com/vindex-project/vindex)
+- IRC: [#vindex-dev on Libera](https://web.libera.chat/#vindex-dev)
+- It is HIGHLY recommended that you join the #vindex-dev IRC channel if you are developing software that uses vindex. Due to the nature of this open source software project, joining this channel and idling is the best way to stay updated on best practices and new developments in the vindex ecosystem. All you need to do is join the IRC channel and idle to stay updated with the latest in vindex development. If you do not, you risk wasting resources on developing integrations that are not compatible with the vindex network. The vindex core team and community continuously make efforts to communicate updates, developments, and documentation via other platforms – but for the best information, you need to talk to other vindex developers, and they are on IRC. #vindex-dev is about vindex development, not getting help about using vindex, or help about development of other software, including yours, unless it also pertains to vindex code itself. For these cases, checkout #vindex.
+
+## Vulnerability response
+
+- Our [Vulnerability Response Process](https://github.com/vindex-project/meta/blob/master/VULNERABILITY_RESPONSE_PROCESS.md) encourages responsible disclosure
+- We are also available via [HackerOne](https://hackerone.com/vindex)
+
+## Research
+
+The [vindex Research Lab](https://src.getvindex.org/resources/research-lab/) is an open forum where the community coordinates research into vindex cryptography, protocols, fungibility, analysis, and more. We welcome collaboration and contributions from outside researchers! Because not all Lab work and publications are distributed as traditional preprints or articles, they may be easy to miss if you are conducting literature reviews for your own vindex research. You are encouraged to get in touch with the vindex research community if you have questions, wish to collaborate, or would like guidance to help avoid unnecessarily duplicating earlier or known work.
+
+The vindex research community is available on IRC in [#vindex-research-lab on Libera](https://web.libera.chat/#vindex-research-lab), which is also accessible via Matrix.
+
+## Announcements
+
+- You can subscribe to an [announcement listserv](https://lists.getvindex.org) to get critical announcements from the vindex core team. The announcement list can be very helpful for knowing when software updates are needed.
+
+## Translations
+The CLI wallet is available in different languages. If you want to help translate it, see our self-hosted localization platform, Weblate, on [translate.getvindex.org]( https://translate.getvindex.org/projects/vindex/cli-wallet/). Every translation *must* be uploaded on the platform, pull requests directly editing the code in this repository will be closed. If you need help with Weblate, you can find a guide with screenshots [here](https://github.com/vindex-ecosystem/vindex-translations/blob/master/weblate.md).
+&nbsp;
+
+If you need help/support/info about translations, contact the localization workgroup. You can find the complete list of contacts on the repository of the workgroup: [vindex-translations](https://github.com/vindex-ecosystem/vindex-translations#contacts).
+
+## Coverage
+
+| Type      | Status |
+|-----------|--------|
+| Coverity  | [![Coverity Status](https://scan.coverity.com/projects/9657/badge.svg)](https://scan.coverity.com/projects/9657/)
+| OSS Fuzz  | [![Fuzzing Status](https://oss-fuzz-build-logs.storage.googleapis.com/badges/vindex.svg)](https://bugs.chromium.org/p/oss-fuzz/issues/list?sort=-opened&can=1&q=proj:vindex)
+| Coveralls | [![Coveralls Status](https://coveralls.io/repos/github/vindex-project/vindex/badge.svg?branch=master)](https://coveralls.io/github/vindex-project/vindex?branch=master)
+| License   | [![License](https://img.shields.io/badge/license-BSD3-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+
+## Introduction
+
+vindex is a private, secure, untraceable, decentralised digital currency. You are your bank, you control your funds, and nobody can trace your transfers unless you allow them to do so.
+
+**Privacy:** vindex uses a cryptographically sound system to allow you to send and receive funds without your transactions being easily revealed on the blockchain (the ledger of transactions that everyone has). This ensures that your purchases, receipts, and all transfers remain private by default.
+
+**Security:** Using the power of a distributed peer-to-peer consensus network, every transaction on the network is cryptographically secured. Individual wallets have a 25-word mnemonic seed that is only displayed once and can be written down to backup the wallet. Wallet files should be encrypted with a strong passphrase to ensure they are useless if ever stolen.
+
+**Untraceability:** By taking advantage of ring signatures, a special property of a certain type of cryptography, vindex is able to ensure that transactions are not only untraceable but have an optional measure of ambiguity that ensures that transactions cannot easily be tied back to an individual user or computer.
+
+**Decentralization:** The utility of vindex depends on its decentralised peer-to-peer consensus network - anyone should be able to run the vindex software, validate the integrity of the blockchain, and participate in all aspects of the vindex network using consumer-grade commodity hardware. Decentralization of the vindex network is maintained by software development that minimizes the costs of running the vindex software and inhibits the proliferation of specialized, non-commodity hardware.
+
+## About this project
+
+This is the core implementation of vindex. It is open source and completely free to use without restrictions, except for those specified in the license agreement below. There are no restrictions on anyone creating an alternative implementation of vindex that uses the protocol and network in a compatible manner.
+
+As with many development projects, the repository on GitHub is considered to be the "staging" area for the latest changes. Before changes are merged into that branch on the main repository, they are tested by individual developers in their own branches, submitted as a pull request, and then subsequently tested by contributors who focus on testing and code reviews. That having been said, the repository should be carefully considered before using it in a production environment, unless there is a patch in the repository for a particular show-stopping issue you are experiencing. It is generally a better idea to use a tagged release for stability.
+
+**Anyone is welcome to contribute to vindex's codebase!** If you have a fix or code change, feel free to submit it as a pull request directly to the "master" branch. In cases where the change is relatively small or does not affect other parts of the codebase, it may be merged in immediately by any one of the collaborators. On the other hand, if the change is particularly large or complex, it is expected that it will be discussed at length either well in advance of the pull request being submitted, or even directly on the pull request.
+
+## Supporting the project
+
+vindex is a 100% community-sponsored endeavor. If you want to join our efforts, the easiest thing you can do is support the project financially. Both vindex and Bitcoin donations can be made to **donate.getvindex.org** if using a client that supports the [OpenAlias](https://openalias.org) standard. Alternatively, you can send VDX to the vindex donation address via the `donate` command (type `help` in the command-line wallet for details).
+
+The vindex donation address is:  
+`888tNkZrPN6JsEgekjMnABU4TBzc2Dt29EPAvkRxbANsAnjyPbb3iQ1YBRk1UXcdRsiKc9dhwMVgN5S9cQUiyoogDavup3H`  
+Viewkey:  
+`f359631075708155cc3d92a32b75a7d02a5dcf27756707b47a2b31b21c389501`  
+Base address for restoring with address and viewkey:
+`44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A`  
+
+The Bitcoin donation address is:  
+`1KTexdemPdxSBcG55heUuTjDRYqbC5ZL8H`
+
+Core development funding and/or some supporting services are also graciously provided by [sponsors](https://www.getvindex.org/community/sponsorships/):
+
+[<img width="150" src="https://www.getvindex.org/img/sponsors/tarilabs.png"/>](https://tarilabs.com/)
+[<img width="150" src="https://www.getvindex.org/img/sponsors/symas.png"/>](https://symas.com/)
+[<img width="150" src="https://www.getvindex.org/img/sponsors/macstadium.png"/>](https://www.macstadium.com/)
+
+There are also several mining pools that kindly donate a portion of their fees, [a list of them can be found on our Bitcointalk post](https://bitcointalk.org/index.php?topic=583449.0).
+
+## License
+
+See [LICENSE](LICENSE).
+
+## Contributing
+
+If you want to help out, see [CONTRIBUTING](docs/CONTRIBUTING.md) for a set of guidelines.
+
+## Scheduled software/network upgrades
+
+vindex uses a scheduled software/network upgrade (hard fork) mechanism to implement new features into the vindex software and network. This means that users of vindex (end users and service providers) should run current versions and upgrade their software when new releases are available. Software upgrades occur when new features are developed and implemented in the codebase. Network upgrades occur in tandem with software upgrades that modify the consensus rules of the vindex network. The required software for network upgrades will be available prior to the scheduled network upgrade date. Please check the repository prior to this date for the proper vindex software version. Below is the historical schedule and the projected schedule for the next upgrade.
+
+Dates are provided in the format YYYY-MM-DD. The "Minimum" is the software version that follows the new consensus rules. The "Recommended" version may include bug fixes and other new features that do not affect the consensus rules.
+
+
+| Software upgrade block height  | Date       | Fork version      | Minimum vindex version | Recommended vindex version | Details                                                                            |
+| ------------------------------ | -----------| ----------------- | ---------------------- | -------------------------- | ---------------------------------------------------------------------------------- |
+| 1009827                        | 2016-03-22 | v2                | v0.9.4                 | v0.9.4                     | Allow only >= ringsize 3, blocktime = 120 seconds, fee-free blocksize 60 kb       |
+| 1141317                        | 2016-09-21 | v3                | v0.9.4                 | v0.10.0                    | Splits coinbase into denominations  |
+| 1220516                        | 2017-01-05 | v4                | v0.10.1                | v0.10.2.1                  | Allow normal and RingCT transactions |
+| 1288616                        | 2017-04-15 | v5                | v0.10.3.0              | v0.10.3.1                  | Adjusted minimum blocksize and fee algorithm      |
+| 1400000                        | 2017-09-16 | v6                | v0.11.0.0              | v0.11.0.0                  | Allow only RingCT transactions, allow only >= ringsize 5      |
+| 1546000                        | 2018-04-06 | v7                | v0.12.0.0              | v0.12.3.0                  | Cryptonight variant 1, ringsize >= 7, sorted inputs
+| 1685555                        | 2018-10-18 | v8                | v0.13.0.0              | v0.13.0.4                  | max transaction size at half the penalty free block size, bulletproofs enabled, cryptonight variant 2, fixed ringsize [11](https://youtu.be/KOO5S4vxi0o)
+| 1686275                        | 2018-10-19 | v9                | v0.13.0.0              | v0.13.0.4                  | bulletproofs required
+| 1788000                        | 2019-03-09 | v10               | v0.14.0.0              | v0.14.1.2                  | New PoW based on Cryptonight-R, new block weight algorithm, slightly more efficient RingCT format
+| 1788720                        | 2019-03-10 | v11               | v0.14.0.0              | v0.14.1.2                  | forbid old RingCT transaction format
+| 1978433                        | 2019-11-30 | v12               | v0.15.0.0              | v0.16.0.0                  | New PoW based on RandomX, only allow >= 2 outputs, change to the block median used to calculate penalty, v1 coinbases are forbidden, rct sigs in coinbase forbidden, 10 block lock time for incoming outputs
+| 2210000                        | 2020-10-17 | v13               | v0.17.0.0              | v0.17.3.2                  | New CLSAG transaction format
+| 2210720                        | 2020-10-18 | v14               | v0.17.1.1              | v0.17.3.2                  | forbid old MLSAG transaction format
+| 2688888                        | 2022-08-13 | v15               | v0.18.0.0              | v0.18.5.0                  | ringsize = 16, bulletproofs+, view tags, adjusted dynamic block weight algorithm
+| 2689608                        | 2022-08-14 | v16               | v0.18.0.0              | v0.18.5.0                  | forbid old v14 transaction format
+| XXXXXXX                        | XXX-XX-XX | XXX                | vX.XX.X.X              | vX.XX.X.X                  | XXX |
+
+X's indicate that these details have not been determined as of commit date.
+
+\* indicates estimate as of commit date
+
+## Release staging schedule and protocol
+
+Approximately three months prior to a scheduled software upgrade, a branch from master will be created with the new release version tag. Pull requests that address bugs should then be made to both master and the new release branch. Pull requests that require extensive review and testing (generally, optimizations and new features) should *not* be made to the release branch.
+
+## Compiling vindex from source
+
+### Dependencies
+
+The following table summarizes the tools and libraries required to build. A
+few of the libraries are also included in this repository (marked as
+"Vendored"). By default, the build uses the library installed on the system
+and ignores the vendored sources. However, if no library is found installed on
+the system, then the vendored source will be built and used. The vendored
+sources are also used for statically-linked builds because distribution
+packages often include only shared library binaries (`.so`) but not static
+library archives (`.a`).
+
+| Dep          | Min. version  | Vendored | Debian/Ubuntu pkg    | Arch pkg     | Void pkg           | Fedora pkg          | Optional | Purpose         |
+| ------------ | ------------- | -------- | -------------------- | ------------ | ------------------ | ------------------- | -------- | --------------- |
+| GCC          | 7             | NO       | `build-essential`    | `base-devel` | `base-devel`       | `gcc`               | NO       |                 |
+| CMake        | 3.10          | NO       | `cmake`              | `cmake`      | `cmake`            | `cmake`             | NO       |                 |
+| pkg-config   | any           | NO       | `pkg-config`         | `base-devel` | `base-devel`       | `pkgconf`           | NO       |                 |
+| Boost        | 1.66          | NO       | `libboost-all-dev`   | `boost`      | `boost-devel`      | `boost-devel`       | NO       | C++ libraries   |
+| OpenSSL      | basically any | NO       | `libssl-dev`         | `openssl`    | `openssl-devel`    | `openssl-devel`     | NO       | sha256 sum      |
+| libzmq       | 4.2.0         | NO       | `libzmq3-dev`        | `zeromq`     | `zeromq-devel`     | `zeromq-devel`      | NO       | ZeroMQ library  |
+| libunbound   | 1.4.16        | NO       | `libunbound-dev`     | `unbound`    | `unbound-devel`    | `unbound-devel`     | NO       | DNS resolver    |
+| libsodium    | ?             | NO       | `libsodium-dev`      | `libsodium`  | `libsodium-devel`  | `libsodium-devel`   | NO       | cryptography    |
+| libunwind    | any           | NO       | `libunwind8-dev`     | `libunwind`  | `libunwind-devel`  | `libunwind-devel`   | YES      | Stack traces    |
+| liblzma      | any           | NO       | `liblzma-dev`        | `xz`         | `liblzma-devel`    | `xz-devel`          | YES      | For libunwind   |
+| libreadline  | 6.3.0         | NO       | `libreadline6-dev`   | `readline`   | `readline-devel`   | `readline-devel`    | YES      | Input editing   |
+| expat        | 1.1           | NO       | `libexpat1-dev`      | `expat`      | `expat-devel`      | `expat-devel`       | YES      | XML parsing     |
+| GTest        | 1.5           | YES      | `libgtest-dev`       | `gtest`      | `gtest-devel`      | `gtest-devel`       | YES      | Test suite      |
+| ccache       | any           | NO       | `ccache`             | `ccache`     | `ccache`           | `ccache`            | YES      | Compil. cache   |
+| Doxygen      | any           | NO       | `doxygen`            | `doxygen`    | `doxygen`          | `doxygen`           | YES      | Documentation   |
+| Graphviz     | any           | NO       | `graphviz`           | `graphviz`   | `graphviz`         | `graphviz`          | YES      | Documentation   |
+| lrelease     | ?             | NO       | `qttools5-dev-tools` | `qt5-tools`  | `qt5-tools`        | `qt5-linguist`      | YES      | Translations    |
+| libhidapi    | ?             | NO       | `libhidapi-dev`      | `hidapi`     | `hidapi-devel`     | `hidapi-devel`      | YES      | Hardware wallet |
+| libusb       | ?             | NO       | `libusb-1.0-0-dev`   | `libusb`     | `libusb-devel`     | `libusbx-devel`     | YES      | Hardware wallet |
+| libprotobuf  | ?             | NO       | `libprotobuf-dev`    | `protobuf`   | `protobuf-devel`   | `protobuf-devel`    | YES      | Hardware wallet |
+| protoc       | ?             | NO       | `protobuf-compiler`  | `protobuf`   | `protobuf`         | `protobuf-compiler` | YES      | Hardware wallet |
+| libudev      | ?             | NO       | `libudev-dev`        | `systemd`    | `eudev-libudev-devel` | `systemd-devel`  | YES      | Hardware wallet |
+
+Install all dependencies at once on Debian/Ubuntu:
+
+```
+sudo apt update && sudo apt install build-essential cmake pkg-config libssl-dev libzmq3-dev libunbound-dev libsodium-dev libunwind8-dev liblzma-dev libreadline6-dev libexpat1-dev qttools5-dev-tools libhidapi-dev libusb-1.0-0-dev libprotobuf-dev protobuf-compiler libudev-dev libboost-chrono-dev libboost-date-time-dev libboost-filesystem-dev libboost-locale-dev libboost-program-options-dev libboost-regex-dev libboost-serialization-dev libboost-system-dev libboost-thread-dev python3 ccache doxygen graphviz git curl autoconf libtool gperf
+```
+
+Install all dependencies at once on Arch:
+```
+sudo pacman -Syu --needed base-devel cmake boost boost-libs openssl zeromq unbound libsodium libunwind xz readline expat python3 ccache doxygen graphviz qt5-tools hidapi libusb protobuf systemd
+```
+
+Install all dependencies at once on Fedora:
+```
+sudo dnf install gcc gcc-c++ cmake pkgconf boost-devel openssl-devel zeromq-devel unbound-devel libsodium-devel libunwind-devel xz-devel readline-devel expat-devel ccache doxygen graphviz qt5-linguist hidapi-devel libusbx-devel protobuf-devel protobuf-compiler systemd-devel
+```
+
+Install all dependencies at once on openSUSE:
+
+```
+sudo zypper ref && sudo zypper in cppzmq-devel libboost_chrono-devel libboost_date_time-devel libboost_filesystem-devel libboost_locale-devel libboost_program_options-devel libboost_regex-devel libboost_serialization-devel libboost_system-devel libboost_thread-devel libexpat-devel libsodium-devel libunwind-devel unbound-devel cmake doxygen ccache fdupes gcc-c++ libevent-devel libopenssl-devel pkgconf-pkg-config readline-devel xz-devel libqt5-qttools-devel patterns-devel-C-C++-devel_C_C++
+```
+
+Install all dependencies at once on macOS with the provided Brewfile:
+
+```
+brew update && brew bundle --file=contrib/brew/Brewfile
+```
+
+FreeBSD 12.1 one-liner required to build dependencies:
+
+```
+pkg install git gmake cmake pkgconf boost-libs libzmq4 libsodium unbound
+```
+
+### Cloning the repository
+
+Clone recursively to pull-in needed submodule(s):
+
+```
+git clone --recursive https://github.com/vindex-project/vindex
+```
+
+If you already have a repo cloned, initialize and update:
+
+```
+cd vindex && git submodule init && git submodule update
+```
+
+*Note*: If there are submodule differences between branches, you may need 
+to use `git submodule sync && git submodule update` after changing branches
+to build successfully.
+
+### Build instructions
+
+vindex uses the CMake build system and a top-level [Makefile](Makefile) that
+invokes cmake commands as needed.
+
+#### On Linux and macOS
+
+* Install the dependencies
+* Change to the root of the source code directory, change to the most recent release branch, and build:
+
+    ```bash
+    cd vindex
+    git checkout release-v0.18
+    make
+    ```
+
+    *Optional*: If your machine has several cores and enough memory, enable
+    parallel build by running `make -j<number of threads>` instead of `make`. For
+    this to be worthwhile, the machine should have one core and about 2GB of RAM
+    available per thread.
+
+    *Note*: The instructions above will compile the most stable release of the
+    vindex software. If you would like to use and test the most recent software,
+    use `git checkout master`. The master branch may contain updates that are
+    both unstable and incompatible with release software, though testing is always
+    encouraged.
+
+* The resulting executables can be found in `build/release/bin`
+
+* Add `PATH="$PATH:$HOME/vindex/build/release/bin"` to `.profile`
+
+* Run vindex with `vindexd --detach`
+
+* **Optional**: build and run the test suite to verify the binaries:
+
+    ```bash
+    make release-test
+    ```
+
+    *NOTE*: `core_tests` test may take a few hours to complete.
+
+* **Optional**: to build binaries suitable for debugging:
+
+    ```bash
+    make debug
+    ```
+
+* **Optional**: build documentation in `doc/html` (omit `HAVE_DOT=YES` if `graphviz` is not installed):
+
+    ```bash
+    HAVE_DOT=YES doxygen Doxyfile
+    ```
+
+* **Optional**: use ccache not to rebuild translation units, that haven't really changed. vindex's CMakeLists.txt file automatically handles it
+
+    ```bash
+    sudo apt install ccache
+    ```
+
+#### On the Raspberry Pi
+
+Tested on a Raspberry Pi 5B with a clean installation of Raspberry Pi OS (64-bit) with Debian 12 from https://www.raspberrypi.com/software/operating-systems/.
+
+* `apt-get update && apt-get upgrade` to install the latest software
+
+* Install the dependencies for vindex from the 'Debian' column in the table above.
+
+* **Optional**: increase the system swap size:
+
+    ```bash
+    sudo /etc/init.d/dphys-swapfile stop  
+    sudo nano /etc/dphys-swapfile  
+    CONF_SWAPSIZE=2048
+    sudo /etc/init.d/dphys-swapfile start
+    ```
+
+* If using an external hard disk without an external power supply, ensure it gets enough power to avoid hardware issues when syncing, by adding the line "max_usb_current=1" to /boot/config.txt
+
+* Clone vindex and checkout the most recent release version:
+
+    ```bash
+    git clone --recursive https://github.com/vindex-project/vindex.git
+    cd vindex
+    git checkout v0.18.4.1
+    ```
+
+* Build:
+
+    ```bash
+    USE_SINGLE_BUILDDIR=1 make release
+    ```
+
+* Wait a few hours
+
+* The resulting executables can be found in `build/release/bin`
+
+* Add `export PATH="$PATH:$HOME/vindex/build/release/bin"` to `$HOME/.profile`
+
+* Run `source $HOME/.profile`
+
+* Run vindex with `vindexd --detach`
+
+* You may wish to reduce the size of the swap file after the build has finished, and delete the boost directory from your home directory
+
+#### On Windows:
+
+Binaries for Windows can be built on Windows using the MinGW toolchain within
+[MSYS2 environment](https://www.msys2.org). The MSYS2 environment emulates a
+POSIX system. The toolchain runs within the environment and *cross-compiles*
+binaries that can run outside of the environment as a regular Windows
+application.
+
+**Preparing the build environment**
+
+* Download and install the [MSYS2 installer](https://www.msys2.org). Installing MSYS2 requires 64-bit Windows 10 or newer.
+* Open the MSYS shell via the `MSYS2 MSYS` shortcut
+* Update packages using pacman:
+
+    ```bash
+    pacman -Syu
+    ```
+
+* Install dependencies:
+
+    ```bash
+    pacman -S mingw-w64-x86_64-toolchain make mingw-w64-x86_64-cmake mingw-w64-x86_64-boost mingw-w64-x86_64-openssl mingw-w64-x86_64-zeromq mingw-w64-x86_64-libsodium mingw-w64-x86_64-hidapi mingw-w64-x86_64-unbound
+    ```
+
+* Open the MingW shell via `MSYS2 MINGW64` shortcut.
+
+**Cloning**
+
+* To git clone, run:
+
+    ```bash
+    git clone --recursive https://github.com/vindex-project/vindex.git
+    ```
+
+**Building**
+
+* Change to the cloned directory, run:
+
+    ```bash
+    cd vindex
+    ```
+
+* If you would like a specific [version/tag](https://github.com/vindex-project/vindex/tags), do a git checkout for that version. eg. 'v0.18.4.1'. If you don't care about the version and just want binaries from master, skip this step:
+
+    ```bash
+    git checkout v0.18.4.1
+    ```
+
+* To build vindex, run:
+
+    ```bash
+    make release-static -j $(nproc)
+    ```
+
+   The resulting executables can be found in `build/release/bin`
+
+
+* **Optional**: to build Windows binaries suitable for debugging, run:
+
+    ```bash
+    make debug -j $(nproc)
+    ```
+
+   The resulting executables can be found in `build/debug/bin`
+
+### On FreeBSD:
+
+The project can be built from scratch by following instructions for Linux above(but use `gmake` instead of `make`). 
+If you are running vindex in a jail, you need to add `sysvsem="new"` to your jail configuration, otherwise lmdb will throw the error message: `Failed to open lmdb environment: Function not implemented`.
+
+vindex is also available as a port or package as `vindex-cli`.
+
+### On OpenBSD:
+
+You will need to add a few packages to your system. `pkg_add cmake gmake zeromq libiconv boost libunbound`.
+
+The `doxygen` and `graphviz` packages are optional and require the xbase set.
+Running the test suite also requires `py3-requests` package.
+
+Build vindex: `gmake`
+
+Note: you may encounter the following error when compiling the latest version of vindex as a normal user:
+
+```
+LLVM ERROR: out of memory
+c++: error: unable to execute command: Abort trap (core dumped)
+```
+
+Then you need to increase the data ulimit size to 2GB and try again: `ulimit -d 2000000`
+
+### On NetBSD:
+
+Check that the dependencies are present: `pkg_info -c libexecinfo boost-headers boost-libs protobuf readline libusb1 zeromq git-base pkgconf gmake cmake | more`, and install any that are reported missing, using `pkg_add` or from your pkgsrc tree.  Readline is optional but worth having.
+
+Third-party dependencies are usually under `/usr/pkg/`, but if you have a custom setup, adjust the "/usr/pkg" (below) accordingly.
+
+Clone the vindex repository recursively and checkout the most recent release as described above. Then build vindex: `gmake BOOST_ROOT=/usr/pkg LDFLAGS="-Wl,-R/usr/pkg/lib" release`.  The resulting executables can be found in `build/NetBSD/[Release version]/Release/bin/`.
+
+### On Solaris:
+
+The default Solaris linker can't be used, you have to install GNU ld, then run cmake manually with the path to your copy of GNU ld:
+
+```bash
+mkdir -p build/release
+cd build/release
+cmake -DCMAKE_LINKER=/path/to/ld -D CMAKE_BUILD_TYPE=Release ../..
+cd ../..
+```
+
+Then you can run make as usual.
+
+### Cross Compiling
+
+You can also cross-compile static binaries on Linux for Windows and macOS with the `depends` system.
+
+* ```make depends target=x86_64-linux-gnu``` for 64-bit linux binaries.
+* ```make depends target=x86_64-w64-mingw32``` for 64-bit windows binaries.
+  * Requires: `g++-mingw-w64-x86-64`
+  * You also need to run:
+    ```shell
+    update-alternatives --set x86_64-w64-mingw32-g++ $(which x86_64-w64-mingw32-g++-posix) && \
+    update-alternatives --set x86_64-w64-mingw32-gcc $(which x86_64-w64-mingw32-gcc-posix)
+    ```
+* ```make depends target=x86_64-apple-darwin``` for Intel macOS binaries.
+  * Requires: `clang-18 lld-18`
+* ```make depends target=arm64-apple-darwin``` for Apple Silicon macOS binaries.
+  * Requires: `clang-18 lld-18`
+  * You also need to run:
+    ```shell
+    export PATH="/usr/lib/llvm-18/bin/:$PATH"
+    ```
+* ```make depends target=i686-linux-gnu``` for 32-bit linux binaries.
+  * Requires: `g++-multilib bc`
+* ```make depends target=i686-w64-mingw32``` for 32-bit windows binaries.
+  * Requires: `python3 g++-mingw-w64-i686`
+* ```make depends target=arm-linux-gnueabihf``` for armv7 binaries.
+  * Requires: `g++-arm-linux-gnueabihf`
+* ```make depends target=aarch64-linux-gnu``` for armv8 binaries.
+  * Requires: `g++-aarch64-linux-gnu`
+* ```make depends target=riscv64-linux-gnu``` for RISC V 64 bit binaries.
+  * Requires: `g++-riscv64-linux-gnu`
+* ```make depends target=x86_64-unknown-freebsd``` for freebsd binaries.
+  * Requires: `clang-8`
+* ```make depends target=arm-linux-android``` for 32bit android binaries
+* ```make depends target=aarch64-linux-android``` for 64bit android binaries
+
+
+The required packages are the names for each toolchain on apt. Depending on your distro, they may have different names. The `depends` system has been tested on Ubuntu 18.04 and 20.04.
+
+Using `depends` might also be easier to compile vindex on Windows than using MSYS. Activate Windows Subsystem for Linux (WSL) with a distro (for example Ubuntu), install the apt build-essentials and follow the `depends` steps as depicted above.
+
+The produced binaries still link libc dynamically. If the binary is compiled on a current distribution, it might not run on an older distribution with an older installation of libc.
+
+### Trezor hardware wallet support
+
+If you have an issue with building vindex with Trezor support, you can disable it by setting `USE_DEVICE_TREZOR=OFF`, e.g., 
+
+```bash
+USE_DEVICE_TREZOR=OFF make release
+```
+
+For more information, please check out Trezor [src/device_trezor/README.md](src/device_trezor/README.md).
+
+### Guix builds
+
+See [contrib/guix/README.md](contrib/guix/README.md).
+
+## Installing vindex from a package
+
+**DISCLAIMER: These packages are not part of this repository or maintained by this project's contributors, and as such, do not go through the same review process to ensure their trustworthiness and security.**
+
+Packages are available for
+
+* Debian 12 (Bookworm) or later
+
+    ```bash
+    sudo apt install vindex
+    ```
+  More info and versions in the [Debian package tracker](https://tracker.debian.org/pkg/vindex).
+
+
+* Arch Linux:
+
+    ```bash
+    sudo pacman -S vindex
+    ```
+
+* NixOS:
+
+    ```bash
+    nix-shell -p vindex-cli
+    ```
+
+* Guix:
+
+    ```bash
+    guix package -i vindex
+    ```
+
+* Gentoo [vindex overlay](https://github.com/gentoo-vindex/gentoo-vindex)
+
+    ```bash
+    emerge --noreplace eselect-repository
+    eselect repository enable vindex
+    emaint sync -r vindex
+    echo '*/*::vindex ~amd64' >> /etc/portage/package.accept_keywords
+    emerge net-p2p/vindex
+    ```
+
+* Alpine Linux:
+
+    ```bash
+    apk add vindex
+    ```
+
+* macOS [(homebrew)](https://brew.sh/)
+    ```bash
+    brew install vindex
+    ```
+
+* Docker
+
+    ```bash
+    # Build using all available cores
+    docker build -t vindex .
+
+    # or build using a specific number of cores (reduce RAM requirement)
+    docker build --build-arg NPROC=1 -t vindex .
+
+    # either run in foreground
+    docker run -it -v /vindex/chain:/home/vindex/.bitvindex -v /vindex/wallet:/wallet -p 18080:18080 vindex
+
+    # or in background
+    docker run -it -d -v /vindex/chain:/home/vindex/.bitvindex -v /vindex/wallet:/wallet -p 18080:18080 vindex
+    ```
+
+  * The build needs 3 GB space.
+  * Wait one hour or more
+
+Packaging for your favorite distribution would be a welcome contribution!
+
+## Running vindexd
+
+The build places the binary in `bin/` sub-directory within the build directory
+from which cmake was invoked (repository root by default). To run in the
+foreground:
+
+```bash
+./bin/vindexd
+```
+
+To list all available options, run `./bin/vindexd --help`.  Options can be
+specified either on the command line or in a configuration file passed by the
+`--config-file` argument.  To specify an option in the configuration file, add
+a line with the syntax `argumentname=value`, where `argumentname` is the name
+of the argument without the leading dashes, for example, `log-level=1`.
+
+To run in background:
+
+```bash
+./bin/vindexd --log-file vindexd.log --detach
+```
+
+To run as a systemd service, copy
+[vindexd.service](utils/systemd/vindexd.service) to `/etc/systemd/system/` and
+[vindexd.conf](utils/conf/vindexd.conf) to `/etc/`. The [example
+service](utils/systemd/vindexd.service) assumes that the user `vindex` exists
+and its home is the data directory specified in the [example
+config](utils/conf/vindexd.conf).
+
+If you're on Mac, you may need to add the `--max-concurrency 1` option to
+vindex-wallet-cli, and possibly vindexd, if you get crashes refreshing.
+
+## Internationalization
+
+See [README.i18n.md](docs/README.i18n.md).
+
+## Using Tor
+
+> There is a new, still experimental, [integration with Tor](docs/ANONYMITY_NETWORKS.md). The
+> feature allows connecting over IPv4 and Tor simultaneously - IPv4 is used for
+> relaying blocks and relaying transactions received by peers whereas Tor is
+> used solely for relaying transactions received over local RPC. This provides
+> privacy and better protection against surrounding node (sybil) attacks.
+
+While vindex isn't made to integrate with Tor, it can be used wrapped with torsocks, by
+setting the following configuration parameters and environment variables:
+
+* `--p2p-bind-ip 127.0.0.1` on the command line or `p2p-bind-ip=127.0.0.1` in
+  vindexd.conf to disable listening for connections on external interfaces.
+* If you use the wallet with a Tor daemon via the loopback IP (eg, 127.0.0.1:9050),
+  then use `--untrusted-daemon` unless it is your own hidden service.
+
+Example command line to start vindexd through Tor:
+
+```bash
+vindexd --proxy 127.0.0.1:9050 --p2p-bind-ip 127.0.0.1
+```
+
+A helper script is in contrib/tor/vindex-over-tor.sh. It assumes Tor is installed
+already, and runs Tor and vindex with the right configuration.
+
+### Using Tor on Tails
+
+TAILS ships with a very restrictive set of firewall rules. Therefore, you need
+to add a rule to allow this connection too, in addition to telling torsocks to
+allow inbound connections. Full example:
+
+```bash
+sudo iptables -I OUTPUT 2 -p tcp -d 127.0.0.1 -m tcp --dport 18081 -j ACCEPT
+DNS_PUBLIC=tcp torsocks ./vindexd --p2p-bind-ip 127.0.0.1 --rpc-bind-ip 127.0.0.1 \
+    --data-dir /home/amnesia/Persistent/your/directory/to/the/blockchain
+```
+
+## Pruning
+
+As of April 2022, the full vindex blockchain file is about 130 GB. One can store a pruned blockchain, which is about 45 GB.
+A pruned blockchain can only serve part of the historical chain data to other peers, but is otherwise identical in
+functionality to the full blockchain.
+To use a pruned blockchain, it is best to start the initial sync with `--prune-blockchain`. However, it is also possible
+to prune an existing blockchain using the `vindex-blockchain-prune` tool or using the `--prune-blockchain` `vindexd` option
+with an existing chain. If an existing chain exists, pruning will temporarily require disk space to store both the full
+and pruned blockchains.
+
+For more detailed information see the ['Pruning' entry in the vindexpedia](https://www.getvindex.org/resources/vindexpedia/pruning.html)
+
+## Debugging
+
+This section contains general instructions for debugging failed installs or problems encountered with vindex. First, ensure you are running the latest version built from the GitHub repo.
+
+### Obtaining stack traces and core dumps on Unix systems
+
+We generally use the tool `gdb` (GNU debugger) to provide stack trace functionality, and `ulimit` to provide core dumps in builds which crash or segfault.
+
+* To use `gdb` in order to obtain a stack trace for a build that has stalled:
+
+Run the build.
+
+Once it stalls, enter the following command:
+
+```bash
+gdb /path/to/vindexd `pidof vindexd`
+```
+
+Type `thread apply all bt` within gdb in order to obtain the stack trace
+
+* If however the core dumps or segfaults:
+
+Enter `ulimit -c unlimited` on the command line to enable unlimited filesizes for core dumps
+
+Enter `echo core | sudo tee /proc/sys/kernel/core_pattern` to stop cores from being hijacked by other tools
+
+Run the build.
+
+When it terminates with an output along the lines of "Segmentation fault (core dumped)", there should be a core dump file in the same directory as vindexd. It may be named just `core`, or `core.xxxx` with numbers appended.
+
+You can now analyse this core dump with `gdb` as follows:
+
+```bash
+gdb /path/to/vindexd /path/to/dumpfile`
+```
+
+Print the stack trace with `bt`
+
+ * If a program crashed and cores are managed by systemd, the following can also get a stack trace for that crash:
+
+```bash
+coredumpctl -1 gdb
+```
+
+#### To run vindex within gdb:
+
+Type `gdb /path/to/vindexd`
+
+Pass command-line options with `--args` followed by the relevant arguments
+
+Type `run` to run vindexd
+
+### Analysing memory corruption
+
+There are two tools available:
+
+#### ASAN
+
+Configure vindex with the -D SANITIZE=ON cmake flag, eg:
+
+```bash
+cd build/debug && cmake -D SANITIZE=ON -D CMAKE_BUILD_TYPE=Debug ../..
+```
+
+You can then run the vindex tools normally. Performance will typically halve.
+
+#### valgrind
+
+Install valgrind and run as `valgrind /path/to/vindexd`. It will be very slow.
+
+### LMDB
+
+Instructions for debugging suspected blockchain corruption as per @HYC
+
+There is an `mdb_stat` command in the LMDB source that can print statistics about the database but it's not routinely built. This can be built with the following command:
+
+```bash
+cd ~/vindex/external/db_drivers/liblmdb && make
+```
+
+The output of `mdb_stat -ea <path to blockchain dir>` will indicate inconsistencies in the blocks, block_heights and block_info table.
+
+The output of `mdb_dump -s blocks <path to blockchain dir>` and `mdb_dump -s block_info <path to blockchain dir>` is useful for indicating whether blocks and block_info contain the same keys.
+
+These records are dumped as hex data, where the first line is the key and the second line is the data.
+
+# Known Issues
+
+## Protocols
+
+### Socket-based
+
+Because of the nature of the socket-based protocols that drive vindex, certain protocol weaknesses are somewhat unavoidable at this time. While these weaknesses can theoretically be fully mitigated, the effort required (the means) may not justify the ends. As such, please consider taking the following precautions if you are a vindex node operator:
+
+- Run `vindexd` on a "secured" machine. If operational security is not your forte, at a very minimum, have a dedicated a computer running `vindexd` and **do not** browse the web, use email clients, or use any other potentially harmful apps on your `vindexd` machine. **Do not click links or load URL/MUA content on the same machine**. Doing so may potentially exploit weaknesses in commands which accept "localhost" and "127.0.0.1".
+- If you plan on hosting a public "remote" node, start `vindexd` with `--restricted-rpc`. This is a must.
+
+### Blockchain-based
+
+Certain blockchain "features" can be considered "bugs" if misused correctly. Consequently, please consider the following:
+
+- When receiving vindex, be aware that it may be locked for an arbitrary time if the sender elected to, preventing you from spending that vindex until the lock time expires. You may want to hold off acting upon such a transaction until the unlock time lapses. To get a sense of that time, you can consider the remaining blocktime until unlock as seen in the `show_transfers` command.

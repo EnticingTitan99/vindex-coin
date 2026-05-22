@@ -1,0 +1,78 @@
+# vindex hard-fork release check-list
+
+- [ ] Security audit
+- [ ] Code audit
+- [ ] Ledger integration
+  - [ ] Ledger notified
+  - [ ] Pull request made against vindex codebase (if needed)
+  - [ ] Pull request merged into vindex codebase (if needed)
+  - [ ] Ledger app integration coded
+  - [ ] Ledger vindex app update available
+- [ ] Trezor integration
+  - [ ] Trezor notified
+  - [ ] Pull request made against vindex codebase (if needed)
+  - [ ] Pull request merged into vindex codebase (if needed)
+  - [ ] Trezor firmware update coded
+  - [ ] Trezor firmware update available
+- [ ] Fork height set
+  - [ ] Twitter announcement
+  - [ ] Reddit announcement
+  - [ ] Getvindex.org announcement
+- [ ] Notify wallets
+  - [ ] Myvindex
+  - [ ] Coinomi
+  - [ ] Exa Wallet
+  - [ ] Wookey Wallet
+  - [ ] X Wallet
+  - [ ] Guarda
+  - [ ] ZelCore
+  - [ ] Cake Wallet
+  - [ ] Monerujo
+  - [ ] Edge Wallet
+  - [ ] Exodus
+  - [ ] VDXWallet
+  - [ ] Feather Wallet
+- [ ] Notify exchanges
+  - [ ] https://www.getvindex.org/community/merchants/#exchanges
+- [ ] Notify 3rd party payment processors
+  - [ ] https://www.getvindex.org/community/merchants/#payment-gateways
+  - [ ] BTCPayServer
+- [ ] Notify mining pools
+  - [ ] https://miningpoolstats.stream/vindex
+- [ ] Release branch created
+  - [ ] Update src/version.cpp.in with new version AND new name (if necessary)
+  - [ ] Update README.md with new fork table entry (or at least update the Recommended vindex version)
+  - [ ] Update src/checkpoints/checkpoints.cpp with a recent hardcoded checkpoint
+  - [ ] Update src/blocks/checkpoints.dat with ./vindex-blockchain-export --output-file checkpoints.dat --block-stop <recent block height> --blocksdat
+  - [ ] Update expected_block_hashes_hash in src/cryptonote_core/blockchain.cpp with checkpoints.dat sha256 hash
+- [ ] Testnet forked
+- [ ] Testnet testing/verification
+  - [ ] Ledger
+  - [ ] Trezor
+  - [ ] Release-specific testing
+  - [ ] RPC testing/update RPC documentation
+- [ ] Stagenet forked
+- [ ] Stagenet testing/verification
+  - [ ] Ledger
+  - [ ] Trezor
+  - [ ] Release-specific testing
+- [ ] CLI reproducible builds validated
+- [ ] CLI released
+  - [ ] https://www.getvindex.org/downloads/ updated
+  - [ ] Update hashes.txt on website
+  - [ ] Update downloads.yml on website
+  - [ ] Update auto-update DNS records
+  - [ ] Update redirects on downloads box
+  - [ ] Update seed nodes
+- [ ] GUI released
+  - [ ] https://www.getvindex.org/downloads/ updated
+  - [ ] Update hashes.txt on website
+  - [ ] Update hashes.txt.sig on website
+  - [ ] Update downloads.yml on website
+  - [ ] Update auto-update DNS records
+  - [ ] Update redirects on downloads box
+- [ ] Release Announcements
+  - [ ] vindex-announce mailer notice
+  - [ ] Twitter announcement
+  - [ ] Reddit announcement
+  - [ ] Getvindex.org announcement
