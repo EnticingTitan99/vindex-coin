@@ -224,8 +224,8 @@ int main(int argc, char const * argv[])
         std::cout << "Failed to parse genesis miner tx" << std::endl;
         return 1;
       }
-      bl.major_version = CURRENT_BLOCK_MAJOR_VERSION;
-      bl.minor_version = CURRENT_BLOCK_MINOR_VERSION;
+      bl.major_version = 1;
+      bl.minor_version = 0;
       bl.timestamp = 0;
       bl.nonce = 10000;
       cryptonote::miner::find_nonce_for_given_block([](const cryptonote::block &b, uint64_t height, const crypto::hash *seed_hash, unsigned int threads, crypto::hash &hash){
