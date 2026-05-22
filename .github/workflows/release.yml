@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release tag name (e.g. v0.1.0-testnet)'
+        required: true
+        default: 'v0.1.0-testnet'
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -17,6 +23,11 @@ jobs:
           - os: ubuntu-22.04
             target: linux-amd64
     runs-on: ${{ matrix.os }}
+
+    # Resolve the effective tag: from push event or manual input
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag_name || github.ref_name }}
+
     steps:
       - uses: actions/checkout@v4.2.2
         with:
@@ -96,22 +107,40 @@ jobs:
           mkdir -p dist
           cp build/Linux/main/release/bin/vindexd dist/
           cp build/Linux/main/release/bin/vindex-wallet-rpc dist/
-          tar -czvf vindex-${{ github.ref_name }}-${{ matrix.target }}.tar.gz -C dist .
+          tar -czvf vindex-${{ env.RELEASE_TAG }}-${{ matrix.target }}.tar.gz -C dist .
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2.2.2
         with:
-          name: Vindex ${{ github.ref_name }}
-          files: vindex-${{ github.ref_name }}-${{ matrix.target }}.tar.gz
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: Vindex ${{ env.RELEASE_TAG }}
+          files: vindex-${{ env.RELEASE_TAG }}-${{ matrix.target }}.tar.gz
           draft: true
-          prerelease: ${{ contains(github.ref_name, 'testnet') || contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') }}
+          prerelease: ${{ contains(env.RELEASE_TAG, 'testnet') || contains(env.RELEASE_TAG, 'alpha') || contains(env.RELEASE_TAG, 'beta') }}
           body: |
-            ## Vindex ${{ github.ref_name }}
-            *Libertatis Vindex* - Champion of Liberty
+            ## Vindex ${{ env.RELEASE_TAG }}
+            *Libertatis Vindex* — Champion of Liberty
+
+            Forked from Monero v0.18.x (Fluorine Fermi). RandomX PoW, ring signatures, RingCT, stealth addresses.
+
+            ### Binaries
+            | File | Platform |
+            |------|----------|
+            | `vindex-${{ env.RELEASE_TAG }}-linux-amd64.tar.gz` | Linux x86_64 |
+
             ### Network Ports
-            | Network  | P2P   | RPC   | ZMQ   |
-            |----------|-------|-------|-------|
-            | Mainnet  | 28080 | 28081 | 28082 |
-            | Testnet  | 38080 | 38081 | 38082 |
-            | Stagenet | 48080 | 48081 | 48082 |
-            | Wallet RPC | -   | 18083 |  -    |
+            | Network    | P2P   | RPC   | ZMQ   |
+            |------------|-------|-------|-------|
+            | Mainnet    | 28080 | 28081 | 28082 |
+            | Testnet    | 38080 | 38081 | 38082 |
+            | Stagenet   | 48080 | 48081 | 48082 |
+            | Wallet RPC | —     | 18083 | —     |
+
+            ### Network ID
+            `VDXNET LIBERTATI` (mainnet) · `VDXNET LIBERTATJ` (testnet)
+
+            ### Verify
+            ```bash
+            tar -xzf vindex-${{ env.RELEASE_TAG }}-linux-amd64.tar.gz
+            ./vindexd --version
+            ```
