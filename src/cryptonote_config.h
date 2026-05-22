@@ -52,7 +52,7 @@
 #define CURRENT_BLOCK_MAJOR_VERSION                     1
 #define CURRENT_BLOCK_MINOR_VERSION                     0
 // FIX: Tightened from 60*60*2 (2 hours) to 60*30 (30 minutes).
-// A 2-hour future-time window is excessive for a 60s block-time chain — it
+// A 2-hour future-time window is excessive for a 60s block-time chain -- it
 // creates a large DoS surface where an attacker can submit blocks with
 // timestamps far in the future to stall difficulty adjustment.
 // 30 minutes = 30 blocks of leeway, which is generous for clock skew.
@@ -112,7 +112,7 @@
 // ---------------------------------------------------------------------------
 // VINDEX DIFFERENTIATOR 2: Tighter ring size default (11 vs Monero 16)
 // Plan: hard fork to 16 once chain has >100k outputs (v19 roadmap)
-// GUARD: Do NOT lower this below 11 — minimum enforced at HF_VERSION_MIN_MIXIN_10
+// GUARD: Do NOT lower this below 11 -- minimum enforced at HF_VERSION_MIN_MIXIN_10
 // ---------------------------------------------------------------------------
 #define CRYPTONOTE_DEFAULT_RING_SIZE                    11
 
@@ -254,7 +254,7 @@ namespace config
   uint64_t const BASE_REWARD_CLAMP_THRESHOLD = ((uint64_t)100000000);
 
   // ---------------------------------------------------------------------------
-  // VINDEX MAINNET — Address prefixes chosen so addresses start with 'V'
+  // VINDEX MAINNET -- Address prefixes chosen so addresses start with 'V'
   // Base58 prefix 20 -> leading character 'V' for standard addresses
   // Use: https://xmr.llcoins.net/addresstests.html to verify
   // ---------------------------------------------------------------------------
@@ -263,14 +263,14 @@ namespace config
   uint64_t const CRYPTONOTE_PUBLIC_SUBADDRESS_BASE58_PREFIX = 43;         // 'Vs'
 
   // ---------------------------------------------------------------------------
-  // VINDEX PORTS — distinct from Monero (18080) to prevent accidental peering
+  // VINDEX PORTS -- distinct from Monero (18080) to prevent accidental peering
   // ---------------------------------------------------------------------------
   uint16_t const P2P_DEFAULT_PORT = 28080;
   uint16_t const RPC_DEFAULT_PORT = 28081;
   uint16_t const ZMQ_RPC_DEFAULT_PORT = 28082;
 
   // ---------------------------------------------------------------------------
-  // VINDEX NETWORK ID — unique 16 magic bytes, prevents peering with Monero
+  // VINDEX NETWORK ID -- unique 16 magic bytes, prevents peering with Monero
   // Generated: 2026-05-22. Do NOT reuse Monero's bytes.
   // ---------------------------------------------------------------------------
   boost::uuids::uuid const NETWORK_ID = { {
@@ -279,19 +279,22 @@ namespace config
     } }; // "VDXNET LIBERTATI" in ASCII
 
   // ---------------------------------------------------------------------------
-  // GENESIS BLOCK — PASS 2 COMPLETE
+  // GENESIS BLOCK -- PASS 2 COMPLETE
   // Genesis TX locked from --print-genesis-tx output on 2026-05-22.
-  // Do NOT change these values — changing them creates a new incompatible chain.
+  // Do NOT change these values -- changing them creates a new incompatible chain.
   // ---------------------------------------------------------------------------
-  std::string const GENESIS_TX = "013c01ff0001ffffffffffff0302df5d56da0c7d643ddd1ce61901c7bdc5fb1738bfe39fbe69c28a3a7032729c0f2101168d0c4ca86fb55a4cf6a36d31431be1c53a3bd7411bb24e8832410289fa6f3b";
+  inline std::string const GENESIS_TX = "013c01ff0001ffffffffffff0302df5d56da0c7d643ddd1ce61901c7bdc5fb1738bfe39fbe69c28a3a7032729c0f2101168d0c4ca86fb55a4cf6a36d31431be1c53a3bd7411bb24e8832410289fa6f3b";
   uint32_t const GENESIS_NONCE = 10000;
 
   // Hash domain separators
-  const char HASH_KEY_BULLETPROOF_EXPONENT[] = "bulletproof";
-  const char HASH_KEY_BULLETPROOF_PLUS_EXPONENT[] = "bulletproof_plus";
-  const char HASH_KEY_BULLETPROOF_PLUS_TRANSCRIPT[] = "bulletproof_plus_transcript";
-  const char HASH_KEY_RINGDB[] = "ringdsb";
-  const char HASH_KEY_SUBADDRESS[] = "SubAddr";
+  // 'inline' is required here: these are non-trivially-constructible
+  // definitions in a header included by multiple TUs. Without 'inline'
+  // the linker raises 'multiple definition of ...' (ODR violation).
+  inline const char HASH_KEY_BULLETPROOF_EXPONENT[] = "bulletproof";
+  inline const char HASH_KEY_BULLETPROOF_PLUS_EXPONENT[] = "bulletproof_plus";
+  inline const char HASH_KEY_BULLETPROOF_PLUS_TRANSCRIPT[] = "bulletproof_plus_transcript";
+  inline const char HASH_KEY_RINGDB[] = "ringdsb";
+  inline const char HASH_KEY_SUBADDRESS[] = "SubAddr";
   const unsigned char HASH_KEY_ENCRYPTED_PAYMENT_ID = 0x8d;
   const unsigned char HASH_KEY_WALLET = 0x8c;
   const unsigned char HASH_KEY_WALLET_CACHE = 0x8d;
@@ -299,18 +302,18 @@ namespace config
   const unsigned char HASH_KEY_BACKGROUND_KEYS_FILE = 0x8f;
   const unsigned char HASH_KEY_RPC_PAYMENT_NONCE = 0x58;
   const unsigned char HASH_KEY_MEMORY = 'k';
-  const unsigned char HASH_KEY_MULTISIG[] = {'M', 'u', 'l', 't' , 'i', 's', 'i', 'g', 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-  const unsigned char HASH_KEY_MULTISIG_KEY_AGGREGATION[] = "Multisig_key_agg";
-  const unsigned char HASH_KEY_CLSAG_ROUND_MULTISIG[] = "CLSAG_round_ms_merge_factor";
-  const unsigned char HASH_KEY_TXPROOF_V2[] = "TXPROOF_V2";
-  const unsigned char HASH_KEY_CLSAG_ROUND[] = "CLSAG_round";
-  const unsigned char HASH_KEY_CLSAG_AGG_0[] = "CLSAG_agg_0";
-  const unsigned char HASH_KEY_CLSAG_AGG_1[] = "CLSAG_agg_1";
-  const char HASH_KEY_MESSAGE_SIGNING[] = "vindexMessageSignature";
+  inline const unsigned char HASH_KEY_MULTISIG[] = {'M', 'u', 'l', 't' , 'i', 's', 'i', 'g', 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+  inline const unsigned char HASH_KEY_MULTISIG_KEY_AGGREGATION[] = "Multisig_key_agg";
+  inline const unsigned char HASH_KEY_CLSAG_ROUND_MULTISIG[] = "CLSAG_round_ms_merge_factor";
+  inline const unsigned char HASH_KEY_TXPROOF_V2[] = "TXPROOF_V2";
+  inline const unsigned char HASH_KEY_CLSAG_ROUND[] = "CLSAG_round";
+  inline const unsigned char HASH_KEY_CLSAG_AGG_0[] = "CLSAG_agg_0";
+  inline const unsigned char HASH_KEY_CLSAG_AGG_1[] = "CLSAG_agg_1";
+  inline const char HASH_KEY_MESSAGE_SIGNING[] = "vindexMessageSignature";
   const unsigned char HASH_KEY_MM_SLOT = 'm';
-  const constexpr char HASH_KEY_MULTISIG_TX_PRIVKEYS_SEED[] = "multisig_tx_privkeys_seed";
-  const constexpr char HASH_KEY_MULTISIG_TX_PRIVKEYS[] = "multisig_tx_privkeys";
-  const constexpr char HASH_KEY_TXHASH_AND_MIXRING[] = "txhash_and_mixring";
+  inline const constexpr char HASH_KEY_MULTISIG_TX_PRIVKEYS_SEED[] = "multisig_tx_privkeys_seed";
+  inline const constexpr char HASH_KEY_MULTISIG_TX_PRIVKEYS[] = "multisig_tx_privkeys";
+  inline const constexpr char HASH_KEY_TXHASH_AND_MIXRING[] = "txhash_and_mixring";
 
   const uint32_t MULTISIG_MAX_SIGNERS{16};
 
@@ -326,7 +329,7 @@ namespace config
         0x56, 0x44, 0x58, 0x4e, 0x45, 0x54, 0x20, 0x4c,
         0x49, 0x42, 0x45, 0x52, 0x54, 0x41, 0x54, 0x4a
       } }; // "VDXNET LIBERTATJ"
-    std::string const GENESIS_TX = "013c01ff0001ffffffffffff0302df5d56da0c7d643ddd1ce61901c7bdc5fb1738bfe39fbe69c28a3a7032729c0f2101168d0c4ca86fb55a4cf6a36d31431be1c53a3bd7411bb24e8832410289fa6f3b";
+    inline std::string const GENESIS_TX = "013c01ff0001ffffffffffff0302df5d56da0c7d643ddd1ce61901c7bdc5fb1738bfe39fbe69c28a3a7032729c0f2101168d0c4ca86fb55a4cf6a36d31431be1c53a3bd7411bb24e8832410289fa6f3b";
     uint32_t const GENESIS_NONCE = 10000;
   }
 
@@ -342,7 +345,7 @@ namespace config
         0x56, 0x44, 0x58, 0x4e, 0x45, 0x54, 0x20, 0x4c,
         0x49, 0x42, 0x45, 0x52, 0x54, 0x41, 0x54, 0x4b
       } }; // "VDXNET LIBERTATK"
-    std::string const GENESIS_TX = "013c01ff0001ffffffffffff0302df5d56da0c7d643ddd1ce61901c7bdc5fb1738bfe39fbe69c28a3a7032729c0f2101168d0c4ca86fb55a4cf6a36d31431be1c53a3bd7411bb24e8832410289fa6f3b";
+    inline std::string const GENESIS_TX = "013c01ff0001ffffffffffff0302df5d56da0c7d643ddd1ce61901c7bdc5fb1738bfe39fbe69c28a3a7032729c0f2101168d0c4ca86fb55a4cf6a36d31431be1c53a3bd7411bb24e8832410289fa6f3b";
     uint32_t const GENESIS_NONCE = 10000;
   }
 }
