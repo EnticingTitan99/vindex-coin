@@ -1,0 +1,55 @@
+name: Vindex Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-and-release:
+    name: Build Release Binaries
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            target: linux-amd64
+          - os: ubuntu-22.04
+            target: linux-arm64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install build dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake pkg-config \
+            libssl-dev libzmq3-dev libunbound-dev \
+            libsodium-dev libunwind8-dev liblzma-dev \
+            libreadline6-dev libexpat1-dev \
+            libboost-all-dev python3 ccache git
+
+      - name: Build (static release)
+        run: make release-static -j$(nproc)
+
+      - name: Package binaries
+        run: |
+          mkdir -p dist
+          cp build/release/bin/* dist/
+          tar -czvf vindex-${{ github.ref_name }}-${{ matrix.target }}.tar.gz -C dist .
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: vindex-${{ github.ref_name }}-${{ matrix.target }}.tar.gz
+          draft: true
+          prerelease: true
+          body: |
+            ## Vindex ${{ github.ref_name }}
+
+            *Libertatis Vindex* — Champion of Liberty
+
+            A privacy-first Monero fork. See README for full build instructions.
