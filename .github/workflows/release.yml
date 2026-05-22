@@ -18,13 +18,13 @@ jobs:
             target: linux-amd64
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
         with:
           submodules: recursive
           fetch-depth: 0
 
       - name: Cache ccache
-        uses: actions/cache@v4
+        uses: actions/cache@v4.2.3
         with:
           path: ~/.ccache
           key: ccache-release-${{ runner.os }}-${{ github.sha }}
@@ -46,7 +46,7 @@ jobs:
             libboost-thread-dev python3
 
       - name: Initialise submodules (safety net)
-        run: git submodule update --init --force
+        run: git submodule update --init --recursive
 
       - name: Configure CMake (Release)
         run: |
@@ -83,7 +83,7 @@ jobs:
           tar -czvf vindex-${{ github.ref_name }}-${{ matrix.target }}.tar.gz -C dist .
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v2.2.2
         with:
           name: Vindex ${{ github.ref_name }}
           files: vindex-${{ github.ref_name }}-${{ matrix.target }}.tar.gz

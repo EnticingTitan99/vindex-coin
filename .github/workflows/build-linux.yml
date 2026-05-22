@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout with submodules
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
         with:
           submodules: recursive
           fetch-depth: 0
@@ -45,19 +45,19 @@ jobs:
     needs: submodule-check
     steps:
       - name: Checkout with submodules
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
         with:
           submodules: recursive
           fetch-depth: 0
 
       - name: Cache apt packages
-        uses: actions/cache@v4
+        uses: actions/cache@v4.2.3
         with:
           path: /var/cache/apt
           key: apt-${{ runner.os }}-vindex-deps-v2
 
       - name: Cache ccache
-        uses: actions/cache@v4
+        uses: actions/cache@v4.2.3
         with:
           path: ~/.ccache
           key: ccache-${{ runner.os }}-${{ github.sha }}
@@ -108,14 +108,14 @@ jobs:
           done
 
       - name: Upload vindexd artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: vindexd-linux-amd64-${{ github.sha }}
           path: build/Linux/main/release/bin/vindexd
           retention-days: 14
 
       - name: Upload vindex-wallet-rpc artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: vindex-wallet-rpc-linux-amd64-${{ github.sha }}
           path: build/Linux/main/release/bin/vindex-wallet-rpc

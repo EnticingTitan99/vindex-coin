@@ -14,7 +14,7 @@ jobs:
     name: Lint & Static Analysis
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
         with:
           submodules: recursive
 
@@ -34,12 +34,12 @@ jobs:
     name: Build (Ubuntu 22.04)
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
         with:
           submodules: recursive
 
       - name: Cache apt packages
-        uses: actions/cache@v4
+        uses: actions/cache@v4.2.3
         with:
           path: /var/cache/apt
           key: apt-${{ runner.os }}-vindex-deps
@@ -73,7 +73,7 @@ jobs:
           make -j$(nproc) daemon
 
       - name: Upload daemon artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: vindexd-linux-amd64
           path: build/release/bin/vindexd
