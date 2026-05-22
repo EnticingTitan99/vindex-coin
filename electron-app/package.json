@@ -49,7 +49,7 @@
         { "target": "portable", "arch": ["x64"] }
       ],
       "publisherName": "The Vindex Project",
-      "verifyUpdateCodeSignature": false
+      "verifyUpdateCodeSignature": true
     },
     "nsis": {
       "oneClick": false,
@@ -63,7 +63,7 @@
     "node-fetch": "^2.7.0"
   },
   "devDependencies": {
-    "electron": "^29.0.0",
+    "electron": "^31.0.0",
     "electron-builder": "^24.9.1"
   }
 }
