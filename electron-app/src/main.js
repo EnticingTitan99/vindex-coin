@@ -6,7 +6,7 @@ let mainWindow;
 let daemonProcess = null;
 let walletRpcProcess = null;
 
-// ─── Platform helpers ───────────────────────────────────────────────────────
+// ─── Platform helpers ───────────────────────────────────────────────────────────
 const isMac = process.platform === 'darwin';
 const isWin = process.platform === 'win32';
 const binExt = isWin ? '.exe' : '';
@@ -18,8 +18,13 @@ function binPath(name) {
   return path.join(binDir, name + binExt);
 }
 
-// ─── Window ─────────────────────────────────────────────────────────────────
+// ─── Window ─────────────────────────────────────────────────────────────────────────────────
 function createWindow() {
+  const iconFile = isMac ? 'icon.icns' : 'icon.ico';
+  const iconPath = path.join(__dirname, '..', 'assets', iconFile);
+  const fs = require('fs');
+  const hasIcon = fs.existsSync(iconPath);
+
   mainWindow = new BrowserWindow({
     width: 1100,
     height: 720,
@@ -34,7 +39,7 @@ function createWindow() {
       nodeIntegration: false,
       sandbox: false
     },
-    icon: path.join(__dirname, '..', 'assets', isWin ? 'icon.ico' : 'icon.icns')
+    ...(hasIcon ? { icon: iconPath } : {})
   });
 
   mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));
@@ -50,7 +55,7 @@ function createWindow() {
   });
 }
 
-// ─── Daemon management ──────────────────────────────────────────────────────
+// ─── Daemon management ────────────────────────────────────────────────────────────────
 function startDaemon() {
   if (daemonProcess) return;
   const daemon = binPath('vindexd');
@@ -75,7 +80,7 @@ function stopDaemon() {
   }
 }
 
-// ─── Wallet RPC management ───────────────────────────────────────────────────
+// ─── Wallet RPC management ───────────────────────────────────────────────────────────────────
 function startWalletRpc(walletFile, password) {
   if (walletRpcProcess) return;
   const rpc = binPath('vindex-wallet-rpc');
@@ -99,7 +104,7 @@ function stopWalletRpc() {
   }
 }
 
-// ─── IPC handlers ────────────────────────────────────────────────────────────
+// ─── IPC handlers ──────────────────────────────────────────────────────────────────────────────
 ipcMain.handle('daemon:start', () => { startDaemon(); return true; });
 ipcMain.handle('daemon:stop',  () => { stopDaemon();  return true; });
 ipcMain.handle('wallet:open',  (_, { file, password }) => { startWalletRpc(file, password); return true; });
@@ -116,7 +121,7 @@ function sendToRenderer(channel, data) {
   }
 }
 
-// ─── App lifecycle ───────────────────────────────────────────────────────────
+// ─── App lifecycle ───────────────────────────────────────────────────────────────────────────────
 app.whenReady().then(() => {
   createWindow();
   app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });

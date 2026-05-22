@@ -13,7 +13,7 @@
   "build": {
     "appId": "com.vindex.wallet",
     "productName": "Vindex Wallet",
-    "copyright": "Copyright © 2026 The Vindex Project",
+    "copyright": "Copyright \u00a9 2026 The Vindex Project",
     "directories": {
       "buildResources": "assets",
       "output": "dist"
