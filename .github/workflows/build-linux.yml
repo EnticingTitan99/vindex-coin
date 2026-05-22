@@ -11,43 +11,14 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  submodule-check:
-    name: Validate Submodules
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout with submodules
-        uses: actions/checkout@v4.2.2
-        with:
-          submodules: recursive
-          fetch-depth: 0
-
-      - name: Verify required submodules are populated
-        run: |
-          MISSING=()
-          for dir in external/rapidjson external/randomx external/supercop external/gtest; do
-            if [ -z "$(ls -A "$dir" 2>/dev/null)" ]; then
-              MISSING+=("$dir")
-            fi
-          done
-          if [ ${#MISSING[@]} -gt 0 ]; then
-            echo "::error::The following submodules are empty or missing:"
-            for m in "${MISSING[@]}"; do echo "  - $m"; done
-            echo ""
-            echo "Fix locally with:"
-            echo "  git submodule update --init --recursive"
-            exit 1
-          fi
-          echo "All required submodules are populated."
-
   build-linux:
     name: Build vindexd + vindex-wallet-rpc (Ubuntu 22.04)
     runs-on: ubuntu-22.04
-    needs: submodule-check
     steps:
-      - name: Checkout with submodules
+      - name: Checkout (no automatic submodules)
         uses: actions/checkout@v4.2.2
         with:
-          submodules: recursive
+          submodules: false
           fetch-depth: 0
 
       - name: Cache apt packages
@@ -77,8 +48,8 @@ jobs:
             libboost-serialization-dev libboost-system-dev \
             libboost-thread-dev python3
 
-      - name: Initialise submodules (safety net)
-        run: git submodule update --init --recursive
+      - name: Initialise submodules
+        run: git submodule update --init --recursive --jobs 4
 
       - name: Configure CMake (Release)
         run: |

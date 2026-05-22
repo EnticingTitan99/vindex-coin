@@ -16,10 +16,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4.2.2
         with:
-          submodules: recursive
+          submodules: false
 
-      - name: Install clang-tidy
-        run: sudo apt-get install -y clang-tidy cppcheck
+      - name: Install cppcheck
+        run: sudo apt-get install -y cppcheck
 
       - name: Run cppcheck
         run: |
@@ -36,7 +36,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4.2.2
         with:
-          submodules: recursive
+          submodules: false
           fetch-depth: 0
 
       - name: Cache apt packages
@@ -66,8 +66,8 @@ jobs:
             libboost-serialization-dev libboost-system-dev \
             libboost-thread-dev python3
 
-      - name: Initialise submodules (safety net)
-        run: git submodule update --init --recursive
+      - name: Initialise submodules
+        run: git submodule update --init --recursive --jobs 4
 
       - name: Configure CMake (Release)
         run: |
