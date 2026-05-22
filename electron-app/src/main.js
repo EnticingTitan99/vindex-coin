@@ -1,5 +1,7 @@
 const { app, BrowserWindow, ipcMain, shell, Menu, nativeTheme } = require('electron');
 const path = require('path');
+const fs = require('fs');
+const os = require('os');
 const { spawn } = require('child_process');
 
 let mainWindow;
@@ -22,7 +24,6 @@ function binPath(name) {
 function createWindow() {
   const iconFile = isMac ? 'icon.icns' : 'icon.ico';
   const iconPath = path.join(__dirname, '..', 'assets', iconFile);
-  const fs = require('fs');
   const hasIcon = fs.existsSync(iconPath);
 
   mainWindow = new BrowserWindow({
@@ -44,7 +45,6 @@ function createWindow() {
 
   mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));
 
-  // Remove default menu in production
   if (app.isPackaged) {
     Menu.setApplicationMenu(null);
   }
@@ -81,18 +81,38 @@ function stopDaemon() {
 }
 
 // ─── Wallet RPC management ───────────────────────────────────────────────────────────────────
+// Security: never pass the wallet password as a CLI argument — it would be
+// visible to all local users via `ps aux` / /proc/<pid>/cmdline.
+// Instead, write it to a mode-0600 temp file, pass --password-file, then
+// delete the file immediately after the child process has spawned.
 function startWalletRpc(walletFile, password) {
   if (walletRpcProcess) return;
   const rpc = binPath('vindex-wallet-rpc');
+
+  // Write password to a private temp file
+  const tmpFile = path.join(os.tmpdir(), `vdx-wallet-${Date.now()}.tmp`);
+  try {
+    fs.writeFileSync(tmpFile, password, { mode: 0o600 });
+  } catch (e) {
+    sendToRenderer('wallet:error', `Failed to write password temp file: ${e.message}`);
+    return;
+  }
+
   try {
     walletRpcProcess = spawn(rpc, [
       '--wallet-file', walletFile,
-      '--password', password,
+      '--password-file', tmpFile,
       '--rpc-bind-port', '18083',
+      '--rpc-bind-ip', '127.0.0.1',   // always localhost-only
       '--disable-rpc-login'
     ], { detached: false });
+
+    // Delete the temp file as soon as the process has started
+    try { fs.unlinkSync(tmpFile); } catch (_) {}
+
     walletRpcProcess.on('exit', () => { walletRpcProcess = null; });
   } catch (e) {
+    try { fs.unlinkSync(tmpFile); } catch (_) {}
     sendToRenderer('wallet:error', e.message);
   }
 }
