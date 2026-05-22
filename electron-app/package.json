@@ -29,7 +29,6 @@
         { "target": "dmg", "arch": ["x64", "arm64"] },
         { "target": "zip", "arch": ["x64", "arm64"] }
       ],
-      "icon": "assets/icon.icns",
       "darkModeSupport": true,
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
@@ -38,7 +37,6 @@
     },
     "dmg": {
       "title": "Vindex Wallet ${version}",
-      "background": "assets/dmg-background.png",
       "window": { "width": 540, "height": 380 },
       "contents": [
         { "x": 140, "y": 190, "type": "file" },
@@ -50,28 +48,16 @@
         { "target": "nsis", "arch": ["x64"] },
         { "target": "portable", "arch": ["x64"] }
       ],
-      "icon": "assets/icon.ico",
       "publisherName": "The Vindex Project",
       "verifyUpdateCodeSignature": false
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "installerIcon": "assets/icon.ico",
-      "uninstallerIcon": "assets/icon.ico",
-      "installerHeaderIcon": "assets/icon.ico",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Vindex Wallet",
-      "license": "../LICENSE"
-    },
-    "extraResources": [
-      {
-        "from": "../binaries/${os}",
-        "to": "bin",
-        "filter": ["**/*"]
-      }
-    ]
+      "shortcutName": "Vindex Wallet"
+    }
   },
   "dependencies": {
     "node-fetch": "^3.3.2"
