@@ -34,6 +34,7 @@
 #include "common/util.h"
 #include "cryptonote_core/cryptonote_core.h"
 #include "cryptonote_basic/miner.h"
+#include "cryptonote_basic/cryptonote_format_utils.h"
 #include "daemon/command_server.h"
 #include "daemon/daemon.h"
 #include "daemon/executor.h"
@@ -144,6 +145,7 @@ int main(int argc, char const * argv[])
       command_line::add_arg(visible_options, command_line::arg_help);
       command_line::add_arg(visible_options, command_line::arg_version);
       command_line::add_arg(visible_options, daemon_args::arg_config_file);
+      command_line::add_arg(visible_options, daemon_args::arg_print_genesis_tx);
 
       // Settings
       command_line::add_arg(core_settings, daemon_args::arg_log_file);
@@ -202,6 +204,37 @@ int main(int argc, char const * argv[])
     if (command_line::get_arg(vm, command_line::arg_version))
     {
       std::cout << "vindex '" << vindex_RELEASE_NAME << "' (v" << vindex_VERSION_FULL << ")" << ENDL;
+      return 0;
+    }
+
+    // Print genesis tx and exit
+    if (command_line::get_arg(vm, daemon_args::arg_print_genesis_tx))
+    {
+      cryptonote::block bl;
+      cryptonote::blobdata tx_bl;
+      bool r = epee::string_tools::parse_hexstr_to_binbuff(std::string(GENESIS_TX), tx_bl);
+      if (!r)
+      {
+        std::cout << "Failed to parse genesis tx hex: " << GENESIS_TX << std::endl;
+        return 1;
+      }
+      r = parse_and_validate_tx_from_blob(tx_bl, bl.miner_tx);
+      if (!r)
+      {
+        std::cout << "Failed to parse genesis miner tx" << std::endl;
+        return 1;
+      }
+      bl.major_version = CURRENT_BLOCK_MAJOR_VERSION;
+      bl.minor_version = CURRENT_BLOCK_MINOR_VERSION;
+      bl.timestamp = 0;
+      bl.nonce = 10000;
+      miner::find_nonce_for_given_block([](const cryptonote::block &b, uint64_t height, const crypto::hash *seed_hash, unsigned int threads, crypto::hash &hash){
+        return cryptonote::get_block_longhash(NULL, b, hash, height, seed_hash, threads);
+      }, bl, 1, 0, NULL);
+      std::cout << "";
+      std::cout << "Insert this line into your cryptonote_config.h:" << std::endl;
+      std::cout << "#define GENESIS_TX \"" << epee::string_tools::buff_to_hex_nodelimer(tx_to_blob(bl.miner_tx)) << "\"" << std::endl;
+      std::cout << "#define GENESIS_NONCE " << bl.nonce << std::endl;
       return 0;
     }
 
