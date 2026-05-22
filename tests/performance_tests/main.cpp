@@ -66,6 +66,8 @@
 #include "multiexp.h"
 #include "sig_mlsag.h"
 #include "sig_clsag.h"
+// ---- Vindex Stress Tests ----
+#include "stress_test.h"
 
 namespace po = boost::program_options;
 
@@ -593,6 +595,39 @@ int main(int argc, char** argv)
   TEST_PERFORMANCE3(filter, p, test_multiexp, multiexp_pippenger, 4096, 8);
   TEST_PERFORMANCE3(filter, p, test_multiexp, multiexp_pippenger, 4096, 9);
 #endif
+
+  // =========================================================================
+  // Vindex Stress Tests — high-load blockchain hot-path benchmarks
+  // Run selectively:  --filter stress_test
+  // =========================================================================
+
+  // 1. High-volume RCT Bulletproof+ transaction construction
+  TEST_PERFORMANCE2(filter, p, test_stress_construct_tx_rct_bp_plus, 2,  2);
+  TEST_PERFORMANCE2(filter, p, test_stress_construct_tx_rct_bp_plus, 4,  4);
+  TEST_PERFORMANCE2(filter, p, test_stress_construct_tx_rct_bp_plus, 8,  8);
+  TEST_PERFORMANCE2(filter, p, test_stress_construct_tx_rct_bp_plus, 16, 16);
+
+  // 2. CLSAG sign stress at mainnet, mid, and high ring sizes
+  TEST_PERFORMANCE1(filter, p, test_stress_clsag_sign, 11);
+  TEST_PERFORMANCE1(filter, p, test_stress_clsag_sign, 16);
+  TEST_PERFORMANCE1(filter, p, test_stress_clsag_sign, 32);
+
+  // 3. Bulletproof+ range-proof generation (16 / 32 / 64 outputs)
+  TEST_PERFORMANCE1(filter, p, test_stress_bp_plus_prove, 16);
+  TEST_PERFORMANCE1(filter, p, test_stress_bp_plus_prove, 32);
+  TEST_PERFORMANCE1(filter, p, test_stress_bp_plus_prove, 64);
+
+  // 4. Batch Bulletproof+ verification (16 tx batch — mirrors daemon mempool path)
+  TEST_PERFORMANCE0(filter, p, test_stress_bp_plus_batch_verify);
+
+  // 5. Key-derivation storm (wallet scanning simulation: 2000 derivations/call)
+  TEST_PERFORMANCE0(filter, p, test_stress_key_derivation_storm);
+
+  // 6. Key-image generation under load (1000 images/call)
+  TEST_PERFORMANCE0(filter, p, test_stress_key_image_generation);
+
+  // 7. Subaddress expansion at scale (1000 subaddresses/call)
+  TEST_PERFORMANCE1(filter, p, test_stress_subaddress_expand, 1000);
 
   std::cout << "Tests finished. Elapsed time: " << timer.elapsed_ms() / 1000 << " sec" << std::endl;
 

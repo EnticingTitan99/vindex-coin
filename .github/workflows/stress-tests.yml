@@ -1,0 +1,84 @@
+# Vindex Coin — Stress Test CI
+# Builds the performance_tests binary and runs only the stress_test suite.
+# Triggers: push/PR to main, and manual workflow_dispatch.
+
+name: Stress Tests
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'tests/performance_tests/**'
+      - 'src/**'
+      - 'CMakeLists.txt'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'tests/performance_tests/**'
+      - 'src/**'
+      - 'CMakeLists.txt'
+  workflow_dispatch:
+
+jobs:
+  stress-test:
+    name: Stress Test (Ubuntu 22.04 Release)
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake pkg-config ccache \
+            libssl-dev libzmq3-dev libunbound-dev libsodium-dev \
+            libunwind-dev liblzma-dev libreadline-dev libexpat1-dev \
+            libboost-all-dev python3
+
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-stress-${{ runner.os }}-${{ hashFiles('CMakeLists.txt') }}
+          restore-keys: |
+            ccache-stress-${{ runner.os }}-
+
+      - name: Configure (Release + tests)
+        run: |
+          mkdir -p build/release
+          cd build/release
+          cmake \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DUSE_DEVICE_TREZOR=OFF \
+            -DBUILD_TESTS=ON \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            ../..
+
+      - name: Build performance_tests
+        run: |
+          export CCACHE_MAXSIZE=5G
+          cd build/release
+          make -j$(nproc) performance_tests 2>&1 | tail -50
+
+      - name: Run Vindex stress tests
+        run: |
+          cd build/release
+          ./tests/performance_tests/performance_tests \
+            --filter "test_stress.*" \
+            --stats \
+            --verbose \
+            --timings-database stress_timings.json
+
+      - name: Upload timing results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stress-timings-${{ github.sha }}
+          path: build/release/stress_timings.json
+          retention-days: 90
